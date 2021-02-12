@@ -325,7 +325,6 @@ public class DynamicJText implements IJsonSerializable {
                 boolean con = combine.contains(jPart);
                 writeExtra(writer, combine);
                 if(!con) jPart.toJson(writer, true);
-                System.out.println(i + "/" + (parts.size()-1));
             }
         }
         parts.removeAll(remove);
