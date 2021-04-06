@@ -268,6 +268,9 @@ public class DynamicJText implements IJsonSerializable {
     }
 
 
+    public BaseComponent[] toComponents() {
+        return ComponentSerializer.parse(toJsonString());
+    }
 
     public String toPlainText() {
         if(!currentEdits.isEmpty()) {
@@ -371,12 +374,7 @@ public class DynamicJText implements IJsonSerializable {
             return;
         }
         String json = toJsonString();
-        try {
-            Class.forName("net.md_5.bungee.chat.ComponentSerializer");
-            ((Player) sender).spigot().sendMessage(ComponentSerializer.parse(json));
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
+        ((Player) sender).spigot().sendMessage(ComponentSerializer.parse(json));
     }
 
     public void broadcast() {
