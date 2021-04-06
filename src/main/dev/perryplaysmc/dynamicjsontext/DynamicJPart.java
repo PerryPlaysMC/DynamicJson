@@ -15,10 +15,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * Copy Right ©
- * This code is private
  * Owner: PerryPlaysMC
- * From: 01/2021-Now
+ * Created: 2/21
  **/
 
 public class DynamicJPart implements IJsonSerializable {

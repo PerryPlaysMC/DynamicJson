@@ -6,10 +6,8 @@ import java.io.IOException;
 import java.io.Serializable;
 
 /**
- * Copy Right ©
- * This code is private
  * Owner: PerryPlaysMC
- * From: 01/2021-Now
+ * Created: 2/21
  **/
 
 public interface IJsonSerializable extends Serializable {

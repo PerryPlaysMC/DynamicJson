@@ -5,7 +5,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Copy Right ©
@@ -24,8 +26,16 @@ public class DynamicJSONText extends JavaPlugin implements Listener {
                 .suggest("Hello there") //Click this to set the text in your chatbar to this
                 .insert(" Hi");//Shift + Click the text and it will append this to the end of your chatbar
         System.out.println(test); //Print it as JSON text to console
-        Player player = Bukkit.getPlayer("PerryPlaysMC");
-        if(player == null) return;
+        if(Bukkit.getOnlinePlayers().size() < 1) {
+            test.send(Bukkit.getConsoleSender());
+            return;
+        }
+        List<Player> online = new ArrayList<>(Bukkit.getOnlinePlayers());
+        Player player = online.get(new Random().nextInt(online.size()));
+        if(player == null) {
+            test.send(Bukkit.getConsoleSender());
+            return;
+        }
         test.send(player);
     }
 }

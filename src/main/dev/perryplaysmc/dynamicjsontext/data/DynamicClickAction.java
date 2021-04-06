@@ -3,10 +3,8 @@ package dev.perryplaysmc.dynamicjsontext.data;
 import java.io.Serializable;
 
 /**
- * Copy Right ©
- * This code is private
  * Owner: PerryPlaysMC
- * From: 01/2021-Now
+ * Created: 2/21
  **/
 
 public enum DynamicClickAction implements Serializable {

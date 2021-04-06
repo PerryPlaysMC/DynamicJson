@@ -28,10 +28,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Copy Right ©
- * This code is private
  * Owner: PerryPlaysMC
- * From: 01/2021-Now
+ * Created: 2/21
  **/
 
 public class DynamicJText implements IJsonSerializable {
@@ -41,7 +39,6 @@ public class DynamicJText implements IJsonSerializable {
     private final String hexRegex = "§[x]§[a-fA-F0-9]§[a-fA-F0-9]§[a-fA-F0-9]§[a-fA-F0-9]§[a-fA-F0-9]§[a-fA-F0-9]";
     private final Pattern COLOR_PATTERN = Pattern.compile(colorRegex, Pattern.CASE_INSENSITIVE);
     private final Pattern HEX_PATTERN = Pattern.compile(hexRegex, Pattern.CASE_INSENSITIVE);
-    private final Pattern SPACES_PATTERN = Pattern.compile("(\\S+)(\\s*)");
     private List<DynamicJPart> parts = new ArrayList<>();
     private List<DynamicJPart> currentEdits;
 
@@ -52,17 +49,22 @@ public class DynamicJText implements IJsonSerializable {
 
     public DynamicJText(String text) {
         currentEdits = new ArrayList<>();
-        findColors(text);
+        add(text);
     }
 
     public DynamicJText() {
         this("");
     }
-
-
     public DynamicJPart getPrevious() {
-        if(parts.size()>0)
-            return parts.get(parts.size()-1);
+        if(parts.size()>0) {
+            int size = parts.size()-1;
+            DynamicJPart part = parts.get(size);
+            while(part.toString().equals("DynamicJPart{text='', hoverAction=NONE, hoverData='', clickAction=NONE, clickActionData='', insertionData='', color=null, styles=[]}")) {
+                part = parts.get(size--);
+                if(size == -1) return part;
+            }
+            return part;
+        }
         return new DynamicJPart("").setColor(ChatColor.WHITE);
     }
 
@@ -83,18 +85,6 @@ public class DynamicJText implements IJsonSerializable {
         }
         currentEdits = new ArrayList<>();
         currentEdits.add(part);
-        return this;
-    }
-
-    public DynamicJText setText(String text) {
-        currentEdits.clear();
-        findColors(text);
-        return this;
-    }
-
-    public DynamicJText setTextTranslated(String text) {
-        currentEdits.clear();
-        findColors(ChatColor.translateAlternateColorCodes(('&'),text));
         return this;
     }
 
@@ -142,7 +132,8 @@ public class DynamicJText implements IJsonSerializable {
                         if(DynamicStyle.byChar(s.charAt(0))!=null) styles.add(DynamicStyle.byChar(s.charAt(0)));
                         else cColor = ChatColor.getByChar(s.charAt(0));
             }
-            if(text == null) continue;
+            if(text == null && cColor==null&&styles.isEmpty()) continue;
+            text = text == null ? "" : text;
             DynamicJPart p = new DynamicJPart(text);
             p.setColor(cColor);
             p.setStyles(styles);
@@ -155,7 +146,14 @@ public class DynamicJText implements IJsonSerializable {
                 }else {
                     currentEdits.add(p);
                 }
-            }else currentEdits.add(p);
+            }else {
+                if(parts.size() > 0) {
+                    DynamicJPart prev = parts.get(parts.size() - 1);
+                    if(prev.getColor() != null && p.getColor() == null)
+                        p.setColor(prev.getColor());
+                }
+                currentEdits.add(p);
+            }
         }
         if(currentEdits.isEmpty()) currentEdits.add(new DynamicJPart(message));
     }
@@ -179,8 +177,17 @@ public class DynamicJText implements IJsonSerializable {
     }
 
 
-    public DynamicJText command(String text) {
+
+    public DynamicJText chat(String text) {
         currentEdits.forEach(edit -> edit.onClick(DynamicClickAction.RUN_COMMAND, text));
+        return this;
+    }
+
+
+    public DynamicJText command(String text) {
+        text = text.startsWith("/") ? text : "/" + text;
+        String finalText = text;
+        currentEdits.forEach(edit -> edit.onClick(DynamicClickAction.RUN_COMMAND, finalText));
         return this;
     }
 
@@ -235,6 +242,17 @@ public class DynamicJText implements IJsonSerializable {
         return this;
     }
 
+    public DynamicJText merge(DynamicJText other) {
+        parts.addAll(currentEdits);
+        currentEdits.clear();
+        other.parts.addAll(other.currentEdits);
+        other.currentEdits.clear();
+        parts.addAll(other.parts);
+        other.parts.clear();
+        return this;
+    }
+
+
 
     public String toJsonString() {
         StringWriter sWriter = new StringWriter();
@@ -269,8 +287,8 @@ public class DynamicJText implements IJsonSerializable {
 
     public DynamicJText clone() {
         DynamicJText jText = new DynamicJText();
-        jText.parts = this.parts;
-        jText.currentEdits = this.currentEdits;
+        jText.parts = new ArrayList<>(this.parts);
+        jText.currentEdits = new ArrayList<>(this.currentEdits);
         return jText;
     }
 
@@ -315,16 +333,12 @@ public class DynamicJText implements IJsonSerializable {
                         remove.add(fut);
                         i++;
                     }
-                    if(combine.size() > 0 && combine.get(combine.size()-1).isSimilar2(jPart))combine.add(jPart);
-                    boolean con = combine.contains(jPart);
                     writeExtra(writer, combine);
-                    if(!con) jPart.toJson(writer, true);
+                    jPart.toJson(writer,true);
                 }
             }else {
-                if(combine.size() > 0 && combine.get(combine.size()-1).isSimilar2(jPart))combine.add(jPart);
-                boolean con = combine.contains(jPart);
                 writeExtra(writer, combine);
-                if(!con) jPart.toJson(writer, true);
+                jPart.toJson(writer, true);
             }
         }
         parts.removeAll(remove);
@@ -357,7 +371,12 @@ public class DynamicJText implements IJsonSerializable {
             return;
         }
         String json = toJsonString();
-        ((Player) sender).spigot().sendMessage(ComponentSerializer.parse(json));
+        try {
+            Class.forName("net.md_5.bungee.chat.ComponentSerializer");
+            ((Player) sender).spigot().sendMessage(ComponentSerializer.parse(json));
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void broadcast() {

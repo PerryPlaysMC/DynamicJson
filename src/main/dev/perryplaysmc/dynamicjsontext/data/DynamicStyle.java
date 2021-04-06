@@ -5,10 +5,8 @@ import net.md_5.bungee.api.ChatColor;
 import java.io.Serializable;
 
 /**
- * Copy Right ©
- * This code is private
  * Owner: PerryPlaysMC
- * From: 01/2021-Now
+ * Created: 2/21
  **/
 
 public enum DynamicStyle implements Serializable {
