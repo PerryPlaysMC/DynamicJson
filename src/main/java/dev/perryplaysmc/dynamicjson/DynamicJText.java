@@ -1,14 +1,14 @@
-package dev.perryplaysmc.dynamicjsontext;
+package dev.perryplaysmc.dynamicjson;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonWriter;
-import dev.perryplaysmc.dynamicjsontext.data.DynamicClickAction;
-import dev.perryplaysmc.dynamicjsontext.data.DynamicHoverAction;
-import dev.perryplaysmc.dynamicjsontext.data.DynamicStyle;
-import dev.perryplaysmc.dynamicjsontext.data.IJsonSerializable;
+import dev.perryplaysmc.dynamicjson.data.DynamicClickAction;
+import dev.perryplaysmc.dynamicjson.data.DynamicHoverAction;
+import dev.perryplaysmc.dynamicjson.data.DynamicStyle;
+import dev.perryplaysmc.dynamicjson.data.IJsonSerializable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
@@ -24,7 +24,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

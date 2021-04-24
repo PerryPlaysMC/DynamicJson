@@ -1,4 +1,4 @@
-package dev.perryplaysmc.dynamicjsontext.data;
+package dev.perryplaysmc.dynamicjson.data;
 
 import net.md_5.bungee.api.ChatColor;
 

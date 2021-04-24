@@ -1,4 +1,4 @@
-package dev.perryplaysmc.dynamicjsontext.data;
+package dev.perryplaysmc.dynamicjson.data;
 
 import com.google.gson.stream.JsonWriter;
 

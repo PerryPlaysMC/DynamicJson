@@ -1,10 +1,10 @@
-package dev.perryplaysmc.dynamicjsontext;
+package dev.perryplaysmc.dynamicjson;
 
 import com.google.gson.stream.JsonWriter;
-import dev.perryplaysmc.dynamicjsontext.data.DynamicClickAction;
-import dev.perryplaysmc.dynamicjsontext.data.DynamicHoverAction;
-import dev.perryplaysmc.dynamicjsontext.data.DynamicStyle;
-import dev.perryplaysmc.dynamicjsontext.data.IJsonSerializable;
+import dev.perryplaysmc.dynamicjson.data.DynamicClickAction;
+import dev.perryplaysmc.dynamicjson.data.DynamicHoverAction;
+import dev.perryplaysmc.dynamicjson.data.DynamicStyle;
+import dev.perryplaysmc.dynamicjson.data.IJsonSerializable;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
