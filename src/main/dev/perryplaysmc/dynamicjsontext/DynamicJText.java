@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -352,7 +353,18 @@ public class DynamicJText implements IJsonSerializable {
         if(extra.size() > 1) {
             DynamicJPart pt = extra.get(0).clone();
             pt.override = true;
-            pt.setText("").setColor(null).setStyles(new ArrayList<>()).toJson(writer, false);
+            List<DynamicStyle> styles = new ArrayList<>();
+            HashMap<DynamicStyle, Integer> stylesMap = new HashMap<>();
+            for(DynamicJPart dynamicJPart : extra) {
+                for(DynamicStyle style : pt.getStyles()) {
+                    if(dynamicJPart.getStyles().contains(style))
+                        stylesMap.put(style, stylesMap.getOrDefault(style,0)+1);
+                }
+            }
+            stylesMap.forEach((dynamicStyle, integer) ->{
+                if(integer >= extra.size()) styles.add(dynamicStyle);
+            });
+            pt.setText("").setColor(null).setStyles(styles).toJson(writer, false);
             writer.name("extra").beginArray();
             for(DynamicJPart jp : extra) {
                 jp.ignoreHoverClickData = true;
