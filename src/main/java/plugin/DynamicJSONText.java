@@ -1,6 +1,5 @@
-package dev.perryplaysmc.dynamicjsontext;
+package dev.perryplaysmc.dynamicjson;
 
-import dev.perryplaysmc.dynamicjson.DynamicJText;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;

@@ -1,0 +1,3 @@
+name: 'DynamicJsonText'
+version: 1.0
+main: 'dev.perryplaysmc.dynamicjson.plugin.DynamicJSONText'
