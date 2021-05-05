@@ -1,4 +1,4 @@
-# DynamicJsonText
+# DynamicJson
 DynamicJsonText is a simple API to create highly compressed JSON Strings
 
 
