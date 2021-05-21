@@ -436,7 +436,7 @@ public class DynamicJText implements IJsonSerializable {
     }
 
     public static DynamicJText fromJson(String json) {
-        JsonElement ele = JsonParser.parseString(json);
+        JsonElement ele = new JsonParser().parse(json);
         JsonObject jObject = ele.getAsJsonObject();
         DynamicJText ret = new DynamicJText();
         DynamicJPart fromJS = fromJObject(jObject);
