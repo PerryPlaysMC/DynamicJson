@@ -9,6 +9,15 @@ import java.io.Serializable;
 
 public enum DynamicClickAction implements Serializable {
 
-    RUN_COMMAND, OPEN_URL, SUGGEST_COMMAND, COPY_TO_CLIPBOARD, NONE
+    RUN_COMMAND, OPEN_URL, SUGGEST_COMMAND, COPY_TO_CLIPBOARD, CHANGE_PAGE, NONE;
+
+
+    public static DynamicClickAction fromName(String name) {
+        for(DynamicClickAction value : values()) {
+            if(value.name().equalsIgnoreCase(name)) return value;
+        }
+        return null;
+    }
+
 
 }

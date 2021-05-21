@@ -1,5 +1,6 @@
-package dev.perryplaysmc.dynamicjson;
+package dev.perryplaysmc.dynamicjson.plugin;
 
+import dev.perryplaysmc.dynamicjson.DynamicJText;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -10,8 +11,6 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Copy Right ©
- * This code is private
  * Owner: PerryPlaysMC
  * From: 01/2021-Now
  **/
@@ -26,6 +25,12 @@ public class DynamicJSONText extends JavaPlugin implements Listener {
                 .suggest("Hello there") //Click this to set the text in your chatbar to this
                 .insert(" Hi");//Shift + Click the text and it will append this to the end of your chatbar
         System.out.println(test); //Print it as JSON text to console
+        System.out.println(DynamicJText.fromJson(
+                "{\"text\":\"You just leveled up\",\"clickEvent\":" +
+                        "{\"action\":\"suggest_command\",\"value\":\"/playerleveling stats\"},\"hoverEvent\":" +
+                        "{\"action\":\"show_text\",\"value\":" +
+                        "[{\"text\":\"You just levelup to a new level\",\"color\":\"dark_red\"}]}}"
+        ));
         if(Bukkit.getOnlinePlayers().size() < 1) {
             test.send(Bukkit.getConsoleSender());
             return;
