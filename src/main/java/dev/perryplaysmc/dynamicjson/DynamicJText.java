@@ -5,11 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonWriter;
-import dev.perryplaysmc.dynamicjson.data.DynamicClickAction;
-import dev.perryplaysmc.dynamicjson.data.DynamicHoverAction;
-import dev.perryplaysmc.dynamicjson.data.DynamicStyle;
-import dev.perryplaysmc.dynamicjson.data.IJsonSerializable;
-import net.md_5.bungee.api.ChatColor;
+import dev.perryplaysmc.dynamicjson.data.*;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -19,14 +15,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -44,6 +39,8 @@ public class DynamicJText implements IJsonSerializable {
     private final Pattern HEX_PATTERN = Pattern.compile(hexRegex, Pattern.CASE_INSENSITIVE);
     private List<DynamicJPart> parts = new ArrayList<>();
     private List<DynamicJPart> currentEdits;
+    private Set<DynamicStyle> toNextS = null;
+    private CColor toNextC = null;
 
     public DynamicJText(DynamicJPart text) {
         currentEdits = new ArrayList<>();
@@ -68,7 +65,7 @@ public class DynamicJText implements IJsonSerializable {
             }
             return part;
         }
-        return new DynamicJPart("").setColor(ChatColor.WHITE);
+        return new DynamicJPart("").setColor(CColor.WHITE);
     }
 
     public DynamicJText add(DynamicJPart part) {
@@ -77,7 +74,7 @@ public class DynamicJText implements IJsonSerializable {
             if(editing != null) {
                 if(editing.getText().isEmpty()) continue;
                 if(parts.size() > 0) {
-                    if(parts.get(parts.size() - 1).isSimilar(editing)) {
+                    if(parts.get(parts.size() - 1).matches(editing)) {
                         DynamicJPart prev = parts.get(parts.size() - 1);
                         prev.setText(prev.getText() + editing.getText());
                         parts.set(parts.size() - 1, prev);
@@ -92,17 +89,62 @@ public class DynamicJText implements IJsonSerializable {
     }
 
     public DynamicJText add(String text) {
+        if(toNextC != null) {
+            text = toNextC.toString() + text;
+            toNextC = null;
+        }
+        if(toNextS != null) {
+            String style = "";
+            for(DynamicStyle toNext : toNextS) style+=toNext.getAsColor().toString();
+            text = style + text;
+            toNextS = null;
+        }
         findColors(text);
         return this;
     }
 
     public DynamicJText addTranslated(String text) {
-        return add(ChatColor.translateAlternateColorCodes(('&'),text));
+        return add(CColor.translateAlternateColorCodes(('&'),text));
+    }
+
+
+    public DynamicJText add(DynamicJText dynamicJText) {
+        if(!currentEdits.isEmpty()) {
+            for(DynamicJPart currentEdit : currentEdits) {
+                if(!parts.contains(currentEdit))parts.add(currentEdit);
+            }
+            currentEdits.clear();
+        }
+        if(!dynamicJText.currentEdits.isEmpty()) {
+            for(DynamicJPart currentEdit : dynamicJText.currentEdits) {
+                if(!dynamicJText.parts.contains(currentEdit))dynamicJText.parts.add(currentEdit);
+            }
+            dynamicJText.currentEdits.clear();
+        }
+        for(DynamicJPart part : dynamicJText.parts)
+            if(!parts.contains(part)) parts.add(part);
+        currentEdits = new ArrayList<>();
+        return this;
+    }
+
+
+    public DynamicJText addReset(String text) {
+        return add(text).applyToNext(getPrevious().getStyles()).applyToNext(getPrevious().getColor());
+    }
+
+    private DynamicJText applyToNext(Set<DynamicStyle> styles) {
+        toNextS = styles;
+        return this;
+    }
+
+    private DynamicJText applyToNext(CColor color) {
+        toNextC = color;
+        return this;
     }
 
     private String changeHex(String hex) {
         Matcher matcher = HEX_PATTERN.matcher(hex);
-        while (matcher.find())
+        while(matcher.find())
             if((matcher.group(0) != null && !matcher.group(0).isEmpty()))
                 hex = hex.replace(matcher.group(), "#" + matcher.group().replace("§", "").substring(1));
         return hex;
@@ -117,23 +159,23 @@ public class DynamicJText implements IJsonSerializable {
         while(matcher.find()) {
             String text = matcher.group(3);
             List<DynamicStyle> styles = new ArrayList<>();
-            ChatColor cColor = null;
+            CColor cColor = null;
             if((matcher.group(1)!=null&&!matcher.group(1).isEmpty())||(matcher.group(2)!=null&&!matcher.group(2).isEmpty())) {
                 String color = (matcher.group(2) == null ? matcher.group(1) : matcher.group(2));
                 boolean checkColor = true;
                 if(color.endsWith("r")) {
-                    cColor = ChatColor.WHITE;
+                    cColor = CColor.WHITE;
                     checkColor = false;
                 }
                 if(checkColor) if(color.matches("(#[a-fA-F0-9]{6})"))
                     try {
-                        cColor = ChatColor.of(color);
+                        cColor = CColor.fromHex(color);
                         checkColor = false;
                     }catch (IllegalArgumentException ignored){}
                 if(checkColor)
                     for(String s : color.split("§")) if(!s.isEmpty())
                         if(DynamicStyle.byChar(s.charAt(0))!=null) styles.add(DynamicStyle.byChar(s.charAt(0)));
-                        else cColor = ChatColor.getByChar(s.charAt(0));
+                        else cColor = CColor.getByChar(s.charAt(0));
             }
             if(text == null && cColor==null&&styles.isEmpty()) continue;
             text = text == null ? "" : text;
@@ -142,7 +184,7 @@ public class DynamicJText implements IJsonSerializable {
             p.setStyles(styles);
             if(currentEdits.size() > 0) {
                 DynamicJPart prev = currentEdits.get(currentEdits.size() - 1);
-                if(p.isSimilar(prev) && prev.checkColors(p)) {
+                if(p.matches(prev) && prev.checkColors(p)) {
                     currentEdits.remove(prev);
                     prev.setText(prev.getText() + p.getText());
                     currentEdits.add(prev);
@@ -180,23 +222,26 @@ public class DynamicJText implements IJsonSerializable {
     }
 
 
+    public DynamicJText onHover(DynamicHoverAction action, String... text) {
+        currentEdits.forEach(edit -> edit.onHover(action, String.join("\n",text)));
+        return this;
+    }
+
+
 
     public DynamicJText chat(String text) {
-        onClick(DynamicClickAction.RUN_COMMAND, text);
-        return this;
+        return onClick(DynamicClickAction.RUN_COMMAND, text);
     }
 
 
     public DynamicJText command(String text) {
         text = text.startsWith("/") ? text : "/" + text;
         String finalText = text;
-        onClick(DynamicClickAction.RUN_COMMAND, finalText);
-        return this;
+        return onClick(DynamicClickAction.RUN_COMMAND, finalText);
     }
 
     public DynamicJText suggest(String text) {
-        onClick(DynamicClickAction.SUGGEST_COMMAND, text);
-        return this;
+        return onClick(DynamicClickAction.SUGGEST_COMMAND, text);
     }
 
     public DynamicJText insert(String text) {
@@ -205,13 +250,11 @@ public class DynamicJText implements IJsonSerializable {
     }
 
     public DynamicJText copy(String text) {
-        onClick(DynamicClickAction.COPY_TO_CLIPBOARD, text);
-        return this;
+        return onClick(DynamicClickAction.COPY_TO_CLIPBOARD, text);
     }
 
     public DynamicJText url(String text) {
-        onClick(DynamicClickAction.OPEN_URL, text);
-        return this;
+        return onClick(DynamicClickAction.OPEN_URL, text);
     }
 
     public DynamicJText onClick(DynamicClickAction action, String text) {
@@ -219,9 +262,9 @@ public class DynamicJText implements IJsonSerializable {
         return this;
     }
 
-    public DynamicJText color(ChatColor color) {
-        if(color==ChatColor.STRIKETHROUGH||color==ChatColor.BOLD||color==ChatColor.MAGIC||color==ChatColor.ITALIC||color==ChatColor.UNDERLINE)
-            throw new IllegalArgumentException("Invalid ChatColor!");
+    public DynamicJText color(CColor color) {
+        if(color==CColor.STRIKETHROUGH||color==CColor.BOLD||color==CColor.MAGIC||color==CColor.ITALIC||color==CColor.UNDERLINE)
+            throw new IllegalArgumentException("Invalid CColor!");
         currentEdits.forEach(edit -> edit.setColor(color));
         String newText = "";
         for(DynamicJPart edit : currentEdits) {
@@ -236,7 +279,7 @@ public class DynamicJText implements IJsonSerializable {
 
 
     public DynamicJText color(org.bukkit.ChatColor color) {
-        return color(color.asBungee());
+        return color(CColor.fromHex(color.toString()));
     }
 
     public DynamicJText addStyle(DynamicStyle style) {
@@ -321,24 +364,24 @@ public class DynamicJText implements IJsonSerializable {
         List<DynamicJPart> combine = new ArrayList<>();
         DynamicJPart empty = new DynamicJPart("");
         List<DynamicJPart> remove = new ArrayList<>();
-        for(DynamicJPart jPart : parts) if(jPart.isSimilar(empty) && jPart.getText().equals("")) remove.add(jPart);
+        for(DynamicJPart jPart : parts) if(jPart.matches(empty) && jPart.getText().equals("")) remove.add(jPart);
         parts.removeAll(remove);
         for(int i = 0; i < parts.size(); i++) {
             DynamicJPart jPart = parts.get(i);
-            if(jPart.isSimilar(empty) && jPart.getText().equals(""))continue;
+            if(jPart.matches(empty) && jPart.getText().equals(""))continue;
             if(i+1 < parts.size() && !jPart.getText().equals("")) {
                 DynamicJPart fut = parts.get(i+1);
-                if(jPart.isSimilar2(fut) && jPart.hasEvents()) {
+                if(jPart.isSimilar(fut) && jPart.hasEvents()) {
                     combine.add(jPart);
                     if(i+2 < parts.size()) {
                         DynamicJPart jp = parts.get(i+2);
-                        if(!jPart.isSimilar2(jp)) {
+                        if(!jPart.isSimilar(jp)) {
                             combine.add(fut);
                             i++;
                         }
                     }
                 }else {
-                    if(!jPart.hasEvents() && jPart.isSimilar(fut) && jPart.checkColors(fut)) {
+                    if(!jPart.hasEvents() && jPart.matches(fut) && jPart.checkColors(fut)) {
                         jPart.setText(jPart.getText() + fut.getText());
                         remove.add(fut);
                         i++;
@@ -357,7 +400,7 @@ public class DynamicJText implements IJsonSerializable {
 
     private void writeExtra(JsonWriter writer, List<DynamicJPart> extra) throws IOException {
         if(extra.size() > 1) {
-            DynamicJPart pt = extra.get(0).clone();
+            DynamicJPart pt = extra.get(0).copy();
             pt.override = true;
             List<DynamicStyle> styles = new ArrayList<>();
             HashMap<DynamicStyle, Integer> stylesMap = new HashMap<>();
@@ -387,23 +430,16 @@ public class DynamicJText implements IJsonSerializable {
     }
 
     public void send(CommandSender sender) {
-        if(!(sender instanceof Player)) {
-            sender.sendMessage(toPlainText().replace("§x",""));
-            return;
-        }
-        String json = toJsonString();
-        ((Player) sender).spigot().sendMessage(ComponentSerializer.parse(json));
+        send(sender, toJsonString());
+    }
+
+    public void send(CommandSender sender, String json) {
+        sender.spigot().sendMessage(ComponentSerializer.parse(json));
     }
 
     public void send(CommandSender... senders) {
-        String json = toJsonString();
-        for(CommandSender sender : senders) {
-            if (!(sender instanceof Player)) {
-                sender.sendMessage(toPlainText().replace("§x", ""));
-                continue;
-            }
-            ((Player) sender).spigot().sendMessage(ComponentSerializer.parse(json));
-        }
+        BaseComponent[] comps = toComponents();
+        for(CommandSender sender : senders) sender.spigot().sendMessage(comps);
     }
 
     public void broadcast() {
@@ -414,51 +450,73 @@ public class DynamicJText implements IJsonSerializable {
 
 
     public static DynamicJText fromComponents(BaseComponent[] comp) {
-        DynamicJText text = new DynamicJText(comp[0].toPlainText());
-        for (int i = 0; i < comp.length; i++) {
-            BaseComponent co = comp[i];
-            text.add(comp[i].toPlainText());
-            ClickEvent ce = co.getClickEvent();
-            if(ce!=null) {
-                if(DynamicClickAction.fromName(ce.getAction().name())!=null)
-                    text.onClick(DynamicClickAction.fromName(ce.getAction().name()), ce.getValue());
-            }
-            if(co.getInsertion()!=null&&!co.getInsertion().isEmpty())
-                text.insert(co.getInsertion());
-
-            HoverEvent he = co.getHoverEvent();
-            if(he!=null) {
-                text.onHover(Arrays.stream(he.getValue())
-                        .map(c -> c.toLegacyText()).collect(Collectors.joining("\n")));
-            }
-        }
-        return text;
+        return fromJson(ComponentSerializer.toString(comp));
     }
 
     public static DynamicJText fromJson(String json) {
-        JsonElement ele = new JsonParser().parse(json);
-        JsonObject jObject = ele.getAsJsonObject();
+        return fromExtra(JsonParser.parseString(json).getAsJsonObject());
+    }
+
+    private static DynamicJText fromExtra(JsonObject object) {
         DynamicJText ret = new DynamicJText();
-        DynamicJPart fromJS = fromJObject(jObject);
-        if(fromJS!=null) ret.add(fromJS);
-        if(jObject.has("extra")) {
-            JsonArray arr = jObject.get("extra").getAsJsonArray();
+        {
+            DynamicJPart fromJ = fromJObject(object);
+            if(fromJ != null) ret.add(fromJ);
+        }
+        if(object.has("extra")) {
+            JsonArray arr = object.get("extra").getAsJsonArray();
             for(int i = 0; i < arr.size(); i++) {
                 JsonObject jO = arr.get(i).getAsJsonObject();
-                DynamicJPart fromJ = fromJObject(jO);
-                if(fromJ!=null) ret.add(fromJ);
+                if(jO.has("extra")) {
+                    DynamicJText text = new DynamicJText();
+                    DynamicJPart part = fromJObject(jO);
+                    DynamicJText add = fromExtra(jO);
+                    if(part!=null) {
+                        text.add(part);
+                        if(part.getText().isEmpty()) {
+                            add.toJsonString();
+                            add.currentEdits.addAll(add.parts);
+                            add.parts.clear();
+                            if(part.getHoverAction() != DynamicHoverAction.NONE)
+                                add.onHover(part.getHoverAction(), part.getHoverData());
+                            if(part.getClickAction()!=DynamicClickAction.NONE)
+                                add.onClick(part.getClickAction(), part.getClickActionData());
+                            if(part.getInsertionData().isEmpty())
+                                ret.insert(part.getInsertionData());
+                            add.parts.addAll(add.currentEdits);
+                            add.currentEdits.clear();
+                            add.toJsonString();
+                        }
+                    }
+                    text.add(add);
+                    ret.add(text);
+                } else {
+                    DynamicJPart fromJ = fromJObject(jO);
+                    if(fromJ != null) {
+                        ret.add((fromJ.getColor()!=null?fromJ.getColor()+"":"") + fromJ.getStyles().stream().map(s->s.getAsColor().toString()).collect(Collectors.joining()) + fromJ.getText());
+                        if(fromJ.getText().isEmpty()) {
+                            if(fromJ.getHoverAction() != DynamicHoverAction.NONE)
+                                ret.onHover(fromJ.getHoverAction(), fromJ.getHoverData());
+                            if(fromJ.getClickAction()!=DynamicClickAction.NONE)
+                                ret.onClick(fromJ.getClickAction(),fromJ.getClickActionData());
+                            if(fromJ.getInsertionData().isEmpty())
+                                ret.insert(fromJ.getInsertionData());
+                        }
+                    }
+                }
             }
         }
         return ret;
     }
+
 
     private static DynamicJPart fromJObject(JsonObject jObject) {
         if(!jObject.has("text"))return null;
         DynamicJPart part = new DynamicJPart(jObject.get("text").getAsString());
         if(jObject.has("color")) {
             String color = jObject.get("color").getAsString();
-            if(color.contains("#")) part.setColor(ChatColor.of(color));
-            else part.setColor(org.bukkit.ChatColor.valueOf(color.toUpperCase()).asBungee());
+            if(color.contains("#")) part.setColor(CColor.fromHex(color));
+            else part.setColor(CColor.fromName(color.toUpperCase()));
         }
         if(jObject.has("hoverEvent")) {
             JsonObject he = jObject.get("hoverEvent").getAsJsonObject();
@@ -466,12 +524,13 @@ public class DynamicJText implements IJsonSerializable {
                 JsonElement get = he.has("value") ? he.get("value") :
                         he.has("contents") ? he.get("contents") : null;
                 String val = "";
-                if(get instanceof JsonArray)
-                    for (JsonElement jsonElement : get.getAsJsonArray()) {
-                        DynamicJPart jp = fromJObject(jsonElement.getAsJsonObject());
-                        if(jp != null) val+=jp.getHoverData()+"\n";
-                    }
-                else val = get.getAsString();
+                if(get != null)
+                    if(get instanceof JsonArray)
+                        for (JsonElement jsonElement : get.getAsJsonArray()) {
+                            DynamicJPart jp = fromJObject(jsonElement.getAsJsonObject());
+                            if(jp != null) val+=jp.getHoverData()+"\n";
+                        }
+                    else val = get.getAsString();
                 val = val.trim();
                 part.onHover(DynamicHoverAction.valueOf(he.get("action").getAsString().toUpperCase()), val);
             }

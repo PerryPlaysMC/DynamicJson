@@ -1,0 +1,10 @@
+dev/perryplaysmc/dynamicjson/Version.class
+dev/perryplaysmc/dynamicjson/Version$Minecraft.class
+dev/perryplaysmc/dynamicjson/data/IJsonSerializable.class
+dev/perryplaysmc/dynamicjson/Version$CraftBukkit.class
+dev/perryplaysmc/dynamicjson/data/CColor.class
+dev/perryplaysmc/dynamicjson/DynamicJPart.class
+dev/perryplaysmc/dynamicjson/data/DynamicStyle.class
+dev/perryplaysmc/dynamicjson/data/DynamicClickAction.class
+dev/perryplaysmc/dynamicjson/data/DynamicHoverAction.class
+dev/perryplaysmc/dynamicjson/DynamicJText.class

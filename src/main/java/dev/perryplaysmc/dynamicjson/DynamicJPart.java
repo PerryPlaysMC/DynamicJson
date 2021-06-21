@@ -1,12 +1,7 @@
 package dev.perryplaysmc.dynamicjson;
 
 import com.google.gson.stream.JsonWriter;
-import dev.perryplaysmc.dynamicjson.data.DynamicClickAction;
-import dev.perryplaysmc.dynamicjson.data.DynamicHoverAction;
-import dev.perryplaysmc.dynamicjson.data.DynamicStyle;
-import dev.perryplaysmc.dynamicjson.data.IJsonSerializable;
-import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
+import dev.perryplaysmc.dynamicjson.data.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
@@ -29,7 +24,7 @@ public class DynamicJPart implements IJsonSerializable {
     private DynamicClickAction clickAction = DynamicClickAction.NONE;
     private String clickActionData = "";
     private String insertionData = "";
-    private ChatColor color = null;
+    private CColor color = null;
     private final Set<DynamicStyle> styles = new HashSet<>();
     protected boolean override = false, ignoreHoverClickData = false;
 
@@ -48,9 +43,9 @@ public class DynamicJPart implements IJsonSerializable {
     public String getInsertionData() {return insertionData;}
 
     public Set<DynamicStyle> getStyles() {return new HashSet<>(styles);}
-    public ChatColor getColor() {return color;}
+    public CColor getColor() {return color;}
 
-    public DynamicJPart clone() {
+    public DynamicJPart copy() {
         DynamicJPart part = new DynamicJPart(text);
         part.insert(insertionData);
         part.onClick(clickAction,clickActionData);
@@ -83,7 +78,7 @@ public class DynamicJPart implements IJsonSerializable {
         return this;
     }
 
-    public DynamicJPart setColor(ChatColor color) {
+    public DynamicJPart setColor(CColor color) {
         this.color = color;
         return this;
     }
@@ -102,13 +97,13 @@ public class DynamicJPart implements IJsonSerializable {
 
 
 
-    public boolean isSimilar(DynamicJPart future) {
-        return checkColors(future) && isSimilar2(future);
+    public boolean matches(DynamicJPart future) {
+        return checkColors(future) && isSimilar(future);
     }
 
 
 
-    public boolean isSimilar2(DynamicJPart future) {
+    public boolean isSimilar(DynamicJPart future) {
         return (future.getHoverAction() == getHoverAction() &&
                 future.getHoverData().equals(getHoverData())) &&
                 (future.getClickAction() == getClickAction() &&
@@ -131,7 +126,7 @@ public class DynamicJPart implements IJsonSerializable {
         hoverData = "";
         for(String s : text) hoverData+=s + "\n";
         if(hoverData.endsWith("\n")) hoverData = hoverData.substring(0, hoverData.length() - ("\n").length());
-        hoverData = ChatColor.translateAlternateColorCodes('&', hoverData);
+        hoverData = CColor.translateAlternateColorCodes('&', hoverData);
         return this;
     }
 
@@ -168,11 +163,9 @@ public class DynamicJPart implements IJsonSerializable {
         if(color != null) writer.name("color").value(color.toString().startsWith("§x") ? color.toString()
                 .replace("§x", "#")
                 .replace("§","") : color.name().toLowerCase());
-
         for(DynamicStyle style : styles) writer.name(style.name().toLowerCase()).value(true);
         if(!ignoreHoverClickData){
             if(!insertionData.isEmpty()) writer.name("insertion").value(insertionData);
-
             if(clickAction != DynamicClickAction.NONE && !clickActionData.isEmpty())
                 writer.name("clickEvent").beginObject()
                         .name("action").value(clickAction.toString().toLowerCase())
@@ -187,17 +180,29 @@ public class DynamicJPart implements IJsonSerializable {
     }
 
 
-    private String convertItemStack(ItemStack item) {
-        String pack =  Bukkit.getServer().getClass().getPackage().getName();
-        String version = pack.substring(pack.lastIndexOf('.')+1).replaceFirst("v", "");
+    private final Class<?> nmsStackC = Version.Minecraft.getClass("world.item.ItemStack"),
+                           cbStack = Version.CraftBukkit.getClass("inventory.CraftItemStack"),
+                           cmp = Version.Minecraft.getClass("nbt.NBTTagCompound");
+    private final Method asNMS, save;
+
+    {
+        Method asNMS1, save1;
         try {
-            Class<?> nmsStackC = Class.forName("net.minecraft.server.v" + version + ".ItemStack");
-            Class<?> cbStack = Class.forName(pack + ".inventory.CraftItemStack");
-            Class<?> cmp = Class.forName("net.minecraft.server.v" + version + ".NBTTagCompound");
-            Object nmsS = cbStack.getMethod("asNMSCopy", ItemStack.class).invoke(null, item);
-            Method m = nmsStackC.getMethod("save", cmp);
-            Object cm = m.invoke(nmsS, cmp.newInstance());
-            return cmp.getMethod("toString").invoke(cm).toString();
+            asNMS1 = cbStack.getMethod("asNMSCopy", ItemStack.class);
+            save1 = nmsStackC.getMethod("save", cmp);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            asNMS1 = null;
+            save1 = null;
+        }
+        asNMS = asNMS1;
+        save = save1;
+    }
+
+    private String convertItemStack(ItemStack item) {
+        try {
+            if(nmsStackC==null||cbStack==null||cmp==null)return "";
+            return save.invoke(asNMS.invoke(null, item), cmp.newInstance()).toString();
         }catch (Exception e) {
             return "";
         }
