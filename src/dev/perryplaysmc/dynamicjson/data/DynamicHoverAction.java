@@ -8,7 +8,7 @@ import java.io.Serializable;
  **/
 
 public enum DynamicHoverAction implements Serializable {
-
-    SHOW_TEXT, SHOW_ITEM, SHOW_ENTITY, NONE
-
+  
+  SHOW_TEXT, SHOW_ITEM, SHOW_ENTITY, NONE
+  
 }

@@ -11,7 +11,7 @@ import java.io.Serializable;
  **/
 
 public interface IJsonSerializable extends Serializable {
-
-    void toJson(JsonWriter writer, boolean end) throws IOException;
-
+  
+  void toJson(JsonWriter writer, boolean end) throws IOException;
+  
 }

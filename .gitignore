@@ -1,0 +1,6 @@
+.gitignore
+src/dev/perryplaysmc/dynamicjson/plugin/DynamicPlugin.java
+resources/plugin.yml
+resources
+src/dev/perryplaysmc/dynamicjson/plugin
+DynamicJson.iml
