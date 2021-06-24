@@ -15,10 +15,12 @@ import java.util.regex.Pattern;
 public class CColor {
   public static final char COLOR_CHAR = ChatColor.COLOR_CHAR;
   public static final String ALL_CODES = "0123456789AaBbCcDdEeFfKkLlMmNnOoRrXx";
-  public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + '§' + "[0-9A-FK-ORX]", Pattern.CASE_INSENSITIVE);
+  public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile(COLOR_CHAR + "[0-9A-FK-ORX]", Pattern.CASE_INSENSITIVE);
   
   private static final String hexRegex = "§[x]§[a-fA-F0-9]§[a-fA-F0-9]§[a-fA-F0-9]§[a-fA-F0-9]§[a-fA-F0-9]§[a-fA-F0-9]";
   private static final Pattern HEX_PATTERN = Pattern.compile(hexRegex, Pattern.CASE_INSENSITIVE);
+  
+  private static final Map<Character, Pattern> CHAT_COLOR_PATTERN_CACHE = new HashMap<>();
   private static final Map<Character, Pattern> HEX_PATTERN_CACHE = new HashMap<>();
   private static final Map<Character, CColor> BY_CHAR = new HashMap<>();
   private static final Map<String, CColor> BY_NAME = new HashMap<>();
@@ -77,21 +79,20 @@ public class CColor {
   
   public boolean equals(Object obj) {
     if(this == obj) return true;
-    else if(obj != null && this.getClass() == obj.getClass())
-      return Objects.equals(this.toString, ((CColor) obj).toString);
+    else if(obj instanceof CColor) return Objects.equals(this.toString, ((CColor) obj).toString);
     return false;
   }
   
-  public String toString() {
-    return this.toString;
-  }
+  public String toString() { return this.toString; }
   
   public static String stripColor(String input) {
     return input == null ? null : STRIP_COLOR_PATTERN.matcher(input).replaceAll("");
   }
   
   public static String translateAlternateColorCodes(char altColorChar, String textToTranslate) {
-    return ChatColor.translateAlternateColorCodes(altColorChar, textToTranslate);
+    Pattern pat = CHAT_COLOR_PATTERN_CACHE.getOrDefault(altColorChar, Pattern.compile(altColorChar + "([0-9a-fk-or])", Pattern.CASE_INSENSITIVE));
+    if(!CHAT_COLOR_PATTERN_CACHE.containsKey(altColorChar)) HEX_PATTERN_CACHE.put(altColorChar, pat);
+    return pat.matcher(textToTranslate).replaceAll(COLOR_CHAR + "$1");
   }
   
   public static String translateHex(char startChar, String textToTranslate) {
