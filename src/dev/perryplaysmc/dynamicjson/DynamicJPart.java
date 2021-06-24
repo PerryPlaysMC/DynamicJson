@@ -54,6 +54,7 @@ public class DynamicJPart implements IJsonSerializable {
     part.onClick(clickAction,clickActionData);
     part.onHover(hoverAction, hoverData);
     part.setStyles(styles);
+    part.setDisabled(disabled);
     part.setColor(color);
     return part;
   }
