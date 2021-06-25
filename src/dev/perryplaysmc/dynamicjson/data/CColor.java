@@ -17,7 +17,7 @@ public class CColor {
   public static final String ALL_CODES = "0123456789AaBbCcDdEeFfKkLlMmNnOoRrXx";
   public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile(COLOR_CHAR + "[0-9A-FK-ORX]", Pattern.CASE_INSENSITIVE);
   
-  private static final String hexRegex = "§[x]§[a-fA-F0-9]§[a-fA-F0-9]§[a-fA-F0-9]§[a-fA-F0-9]§[a-fA-F0-9]§[a-fA-F0-9]";
+  private static final String hexRegex = "(?:§[x](?:§[a-fA-F0-9]){6})";
   private static final Pattern HEX_PATTERN = Pattern.compile(hexRegex, Pattern.CASE_INSENSITIVE);
   
   private static final Map<Character, Pattern> CHAT_COLOR_PATTERN_CACHE = new HashMap<>();
@@ -91,7 +91,7 @@ public class CColor {
   
   public static String translateAlternateColorCodes(char altColorChar, String textToTranslate) {
     Pattern pat = CHAT_COLOR_PATTERN_CACHE.getOrDefault(altColorChar, Pattern.compile(altColorChar + "([0-9a-fk-or])", Pattern.CASE_INSENSITIVE));
-    if(!CHAT_COLOR_PATTERN_CACHE.containsKey(altColorChar)) HEX_PATTERN_CACHE.put(altColorChar, pat);
+    if(!CHAT_COLOR_PATTERN_CACHE.containsKey(altColorChar)) CHAT_COLOR_PATTERN_CACHE.put(altColorChar, pat);
     return pat.matcher(textToTranslate).replaceAll(COLOR_CHAR + "$1");
   }
   
@@ -164,8 +164,7 @@ public class CColor {
   private static String changeHex(String hex) {
     Matcher matcher = HEX_PATTERN.matcher(hex);
     while(matcher.find())
-      if((matcher.group(0) != null && !matcher.group(0).isEmpty()))
-        hex = hex.replace(matcher.group(), "#" + matcher.group().replace("§", "").substring(1));
+      if((matcher.group(0) != null && !matcher.group(0).isEmpty())) hex = hex.replace(matcher.group(), "#" + matcher.group().replace("§", "").substring(1));
     return hex;
   }
   
