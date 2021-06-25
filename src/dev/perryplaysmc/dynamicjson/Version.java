@@ -107,9 +107,8 @@ public enum Version {
 
 
    public static Version value(String versionId) {
-      for(Version version : values()) {
+      for(Version version : values())
          if(versionId.equalsIgnoreCase(version.name()) || versionId.equalsIgnoreCase(version.getVersion())) return version;
-      }
       return null;
    }
 
