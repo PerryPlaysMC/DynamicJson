@@ -13,9 +13,8 @@ public enum DynamicClickAction implements Serializable {
   
   
   public static DynamicClickAction fromName(String name) {
-    for(DynamicClickAction value : values()) {
+    for(DynamicClickAction value : values())
       if(value.name().equalsIgnoreCase(name)) return value;
-    }
     return null;
   }
   
