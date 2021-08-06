@@ -102,7 +102,7 @@ public class CColor {
          Matcher matcher = pat.matcher(textToTranslate);
          while(matcher.find()) {
             String color = "#" + textToTranslate.substring(matcher.start(), matcher.end()).substring(1);
-            textToTranslate = textToTranslate.substring(0, matcher.start()) + CColor.fromHex(color) + textToTranslate.substring(matcher.end());
+            textToTranslate = textToTranslate.substring(0, matcher.start()-1) + CColor.fromHex(color) + textToTranslate.substring(matcher.end()+1);
             matcher = pat.matcher(textToTranslate);
          }
       }
