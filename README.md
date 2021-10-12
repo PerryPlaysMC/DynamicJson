@@ -11,12 +11,13 @@ Simple util for Json messages (Works on books too!)
 ```java
 DynamicJText test = new DynamicJText();//Create a new DynamicJText (optional args [String, DynamicJPart, nothing])
 
-test.addTranslated("&cHello there!!! &b&mHow are you???&r&b&l I'm good!!!") //The text to display
-       .onHover("Hello there") //Hover over the text to show this
-       .suggest("Hello there") //Click this to set the text in your chatbar to this
-       .insert(" Hi")//Shift + Click the text and it will append this to the end of your chatbar
-       .addTranslated("&bHehe, item")
-       .onHover((ItemStack) null); //Show an item when hovering
+test.add("&cThis is an &eexample of &btranslated &dtext") //The text to display
+  .onHover("You hovered over", "&cThis is an &eexample of &btranslated &dtext&r!") //Hover over the text to show this
+  .suggest("You clicked on \"This is an example of translated text\"!") //Click this to set the text in your chatbar to this
+  .insert(" You shift clicked \"This is an example of translated text\"!")//Shift + Click the text and it will append this to the end of your chatbar
+  .add("&3Displays an item on hover")
+  .onHover((ItemStack) null)
+  .addPlain("This text won't translate &bColor &cCodes"); //Show an item when hovering
 System.out.println(test); //Print it as JSON text to console
 
 
