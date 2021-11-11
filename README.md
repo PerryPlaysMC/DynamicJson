@@ -47,3 +47,5 @@ if(player == null) {
 
 test2.send(player);
 test.send(player);
+```
+[![](https://jitpack.io/v/PerryPlaysMC/DynamicJson.svg)](https://jitpack.io/#PerryPlaysMC/DynamicJson)
