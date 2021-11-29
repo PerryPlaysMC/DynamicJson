@@ -33,3 +33,21 @@ Player player = ...;
 test.send(player);
 ```
 
+# Maven
+```maven
+<repositories>
+ <repository>
+  <id>jitpack.io</id>
+  <url>https://jitpack.io</url>
+ </repository>
+</repositories>
+
+<dependencies>
+ <dependency>
+  <groupId>com.github.PerryPlaysMC</groupId>
+  <artifactId>DynamicJson</artifactId>
+  <version>v1.0-RELEASE</version>
+ </dependency>
+</dependencies>
+```
+[![](https://jitpack.io/v/PerryPlaysMC/DynamicJson.svg)](https://jitpack.io/#PerryPlaysMC/DynamicJson)
