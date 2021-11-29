@@ -4,7 +4,6 @@ import com.google.gson.stream.JsonWriter;
 import dev.perryplaysmc.dynamicjson.data.*;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.libs.org.eclipse.sisu.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
