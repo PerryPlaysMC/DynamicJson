@@ -15,6 +15,7 @@ test.add("&cThis is an &eexample of &btranslated &dtext") //The text to display
   .onHover("You hovered over", "&cThis is an &eexample of &btranslated &dtext&r!") //Hover over the text to show this
   .suggest("You clicked on \"This is an example of translated text\"!") //Click this to set the text in your chatbar to this
   .insert(" You shift clicked \"This is an example of translated text\"!")//Shift + Click the text and it will append this to the end of your chatbar
+  .addGradient("This text will have a gradient of Red to Orange", Color.RED, Color.ORANGE)
   .add("&3Displays an item on hover")//Append text as a new part, all previous click & hover events are cleared
   .onHover((ItemStack) null)//Item tooltip (if null defaults to Air)
   .addPlain("This text won't translate &bColor &cCodes"); //This will append plain text, meaning it won't translate &<code>'s
@@ -44,7 +45,7 @@ test.send(player);
 <dependency>
  <groupId>com.github.PerryPlaysMC</groupId>
  <artifactId>DynamicJson</artifactId>
- <version>v1.0-RELEASE</version>
+ <version>v1.1-RELEASE</version>
 </dependency>
 ```
 [![](https://jitpack.io/v/PerryPlaysMC/DynamicJson.svg)](https://jitpack.io/#PerryPlaysMC/DynamicJson)
