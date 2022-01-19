@@ -117,6 +117,10 @@ public class CColor {
       return fromHex("#" + String.format("%08x", color.getRGB()).substring(2));
    }
 
+   public static CColor of(org.bukkit.Color color) {
+      return fromHex("#" + String.format("%08x", color.asRGB()).substring(2));
+   }
+
    public static CColor fromHex(String string) {
       Preconditions.checkArgument(string != null, "string cannot be null");
       if(string.startsWith("#") && string.length() == 7) {

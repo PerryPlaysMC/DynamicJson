@@ -112,11 +112,12 @@ public class DynamicJPart implements IJsonSerializable {
    }
 
    public boolean checkColors(DynamicJPart future) {
+      CColor c1 = getColor(), c2 = future.getColor();
+      boolean hasColor = c1 != null, hasColorF = c2 != null;
       return ((future.getStyles() == null && getStyles() != null) || future.getStyles().containsAll(getStyles()) || (future.getStyles().isEmpty() && getStyles().isEmpty()))
-         &&((getColor() == null && future.getColor() == null) || (getColor() != null && future.getColor()==null) || (getColor() == future.getColor()));
+         &&((!hasColor && !hasColorF) || (hasColor && !hasColorF) || (c1 == c2)
+         || (hasColor && c1.getColor() != null && c2.getColor() != null && DynamicJText.getSimilarity(c1.getColor(),c2.getColor()) < 10));
    }
-
-
 
    public boolean matches(DynamicJPart future) {
       return checkColors(future) && isSimilar(future);
@@ -207,12 +208,18 @@ public class DynamicJPart implements IJsonSerializable {
    private final Method asNMS, save;
 
    {
-      Method asNMS1, save1;
+      Method asNMS1 = null, save1 = null;
       try {
          asNMS1 = cbStack.getMethod("asNMSCopy", ItemStack.class);
          save1 = nmsStackC.getMethod("save", cmp);
       } catch (NoSuchMethodException e) {
-         e.printStackTrace();
+         try {
+            if(asNMS1 == null)
+               asNMS1 = cbStack.getMethod("asNMSCopy", ItemStack.class);
+            if(save1 == null) save1 = nmsStackC.getMethod("b", cmp);
+         } catch (NoSuchMethodException e1) {
+            e1.printStackTrace();
+         }
          asNMS1 = null;
          save1 = null;
       }
@@ -222,6 +229,7 @@ public class DynamicJPart implements IJsonSerializable {
 
    private String convertItemStack(ItemStack item) {
       try {
+         if(item == null) item = new ItemStack(Material.AIR);
          if(nmsStackC==null||cbStack==null||cmp==null)return "";
          return save.invoke(asNMS.invoke(null, item), cmp.newInstance()).toString();
       }catch (Exception e) {

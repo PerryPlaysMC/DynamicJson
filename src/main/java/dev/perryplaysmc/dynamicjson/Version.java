@@ -13,7 +13,8 @@ public enum Version {
    v1_14(1140), v1_14_R1(1141),
    v1_15(1150), v1_15_R1(1151),
    v1_16(1160), v1_16_R1(1161), v1_16_R2(1162), v1_16_R3(1163),
-   v1_17(1170), v1_17_R1(1171), UNKNOWN(Integer.MAX_VALUE, "Unknown");
+   v1_17(1170), v1_17_R1(1171),
+   v1_18(1180), v1_18_R1(1181), UNKNOWN(Integer.MAX_VALUE, "Unknown");
 
    private int ver;
    private String version;
@@ -79,29 +80,27 @@ public enum Version {
    private static Version current, exact;
 
    public static Version getCurrentVersionExact() {
-      if(exact != null) return exact;
       String pack =  Bukkit.getServer().getClass().getPackage().getName();
       String version = pack.substring(pack.lastIndexOf('.')+1);
       Version ret = value(version);
       if(ret == null) {
          ret = Version.UNKNOWN;
-         ret.version = version;
-         ret.ver = Integer.parseInt(version.toLowerCase().replace(("_"),("")).replace(("r"),("")));
+         ret.version = version.startsWith("v") ? version : "v" + version;
+         ret.ver = Integer.parseInt(ret.version.substring(1).toLowerCase().replace(("_"),("")).replace(("r"),("")));
       }
-      return exact = ret;
+      return ret;
    }
 
    public static Version getCurrentVersion() {
-      if(current!=null) return current;
       String pack =  Bukkit.getServer().getClass().getPackage().getName();
       String version = pack.substring(pack.lastIndexOf('.')+1);
       Version ret = value(version.split("_R")[0]);
       if(ret == null) {
          ret = Version.UNKNOWN;
-         ret.version = version;
-         ret.ver = Integer.parseInt(version.toLowerCase().split(("r"))[0].replace(("_"),("")));
+         ret.version = version.startsWith("v") ? version : "v" + version;
+         ret.ver = Integer.parseInt(ret.version.substring(1).toLowerCase().split(("r"))[0].replace(("_"),("")));
       }
-      return current = ret;
+      return ret;
    }
 
 

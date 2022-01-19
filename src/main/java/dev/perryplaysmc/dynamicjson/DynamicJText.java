@@ -10,6 +10,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -54,6 +55,53 @@ public class DynamicJText implements IJsonSerializable {
    public DynamicJText() {
       this("");
    }
+
+   private boolean similarTo(Color c1, Color c2){
+      double distance = (c1.getRed() - c2.getRed())*(c1.getRed() - c2.getRed()) +
+         (c1.getGreen() - c2.getGreen())*(c1.getGreen() - c2.getGreen()) +
+         (c1.getBlue() - c2.getBlue())*(c1.getBlue() - c2.getBlue());
+      return distance <= 20;
+   }
+
+   protected static double getSimilarity(Color c1, Color c2){
+      float diffRed   = Math.abs(c1.getRed() - c2.getRed())/255f;
+      float diffGreen = Math.abs(c1.getGreen() - c2.getGreen())/255f;
+      float diffBlue  = Math.abs(c1.getBlue() - c2.getBlue())/255f;
+      return (diffRed + diffGreen + diffBlue) / 3 * 100;
+   }
+
+
+   protected static double getSimilarity(java.awt.Color c1, java.awt.Color c2){
+      return getSimilarity(Color.fromRGB(c1.getRed(), c1.getGreen(), c1.getBlue()),Color.fromRGB(c2.getRed(), c2.getGreen(), c2.getBlue()));
+   }
+
+   List<Color> createGradient(int steps, Color start, Color... gradients) {
+      List<Color> gradientList = new ArrayList<>();
+      Color color1 = start;
+      Color color2 = gradients[0];
+      int index = 0;
+      steps = (int) (steps/(gradients.length/1.5));
+      A:for(int i = 0; i <= steps; i++) {
+         float ratio = (float) i / (float) steps;
+         int green = (int) (color2.getGreen() * ratio + color1.getGreen() * (1 - ratio));
+         int blue = (int) (color2.getBlue() * ratio + color1.getBlue() * (1 - ratio));
+         int red = (int) (color2.getRed() * ratio + color1.getRed() * (1 - ratio));
+         Color stepColor = Color.fromRGB(red, green, blue);
+         if(i == steps-1) {
+            if(index+1 >= gradients.length) break;
+            color1 = color2;
+            color2 = gradients[++index];
+            i = 0;
+            continue;
+         }
+         for(Color gradient : gradientList)
+            if(similarTo(stepColor,gradient)) continue A;
+         if(!gradientList.contains(stepColor))
+            gradientList.add(stepColor);
+      }
+      return gradientList;
+   }
+
    public DynamicJPart getPrevious() {
       if(parts.size() > 0) {
          if(currentEdits.size() > 0) {
@@ -110,6 +158,25 @@ public class DynamicJText implements IJsonSerializable {
       return this;
    }
 
+   public DynamicJText addGradient(String text, Color start, Color... transition) {
+      String newText = "";
+      List<Color> gradient = createGradient(text.length(), start, transition);
+      int index = 0;
+      int increment = 1;
+      for(char c : text.toCharArray()) {
+         newText+=CColor.of(gradient.get(index)).toString()+c;
+         index+=increment;
+         if(index >= gradient.size()) {
+            increment = -1;
+            index+=increment;
+         }
+         if(index < 0){
+            increment = 1;
+            index+=increment;
+         }
+      }
+      return add(newText);
+   }
 
    public DynamicJText add(String text) {
       return addPlain(CColor.translateAlternateColorCodes('&',text));
