@@ -70,15 +70,14 @@ public class DynamicJText implements IJsonSerializable {
       return (diffRed + diffGreen + diffBlue) / 3 * 100;
    }
 
-
    protected static double getSimilarity(java.awt.Color c1, java.awt.Color c2){
       return getSimilarity(Color.fromRGB(c1.getRed(), c1.getGreen(), c1.getBlue()),Color.fromRGB(c2.getRed(), c2.getGreen(), c2.getBlue()));
    }
 
-   List<Color> createGradient(int steps, Color start, Color... gradients) {
+   List<Color> createGradient(int steps, java.awt.Color start, java.awt.Color... gradients) {
       List<Color> gradientList = new ArrayList<>();
-      Color color1 = start;
-      Color color2 = gradients[0];
+      java.awt.Color color1 = start;
+      java.awt.Color color2 = gradients[0];
       int index = 0;
       steps = (int) (steps/(gradients.length/1.5));
       A:for(int i = 0; i <= steps; i++) {
@@ -158,7 +157,7 @@ public class DynamicJText implements IJsonSerializable {
       return this;
    }
 
-   public DynamicJText addGradient(String text, Color start, Color... transition) {
+   public DynamicJText addGradient(String text, java.awt.Color start, java.awt.Color... transition) {
       String newText = "";
       List<Color> gradient = createGradient(text.length(), start, transition);
       int index = 0;
@@ -176,6 +175,12 @@ public class DynamicJText implements IJsonSerializable {
          }
       }
       return add(newText);
+   }
+
+   public DynamicJText addGradient(String text, CColor start, CColor... transitions) {
+      java.awt.Color[] transition = new java.awt.Color[transitions.length];
+      for(int i = 0; i < transition.length; i++) transition[i] = transitions[i].getColor();
+      return addGradient(text, start.getColor(), transition);
    }
 
    public DynamicJText add(String text) {
