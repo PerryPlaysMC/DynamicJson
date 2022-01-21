@@ -116,7 +116,7 @@ public class DynamicJPart implements IJsonSerializable {
       boolean hasColor = c1 != null, hasColorF = c2 != null;
       return ((future.getStyles() == null && getStyles() != null) || future.getStyles().containsAll(getStyles()) || (future.getStyles().isEmpty() && getStyles().isEmpty()))
          &&((!hasColor && !hasColorF) || (hasColor && !hasColorF) || (c1 == c2)
-         || (hasColor && c1.getColor() != null && c2.getColor() != null && DynamicJText.getSimilarity(c1.getColor(),c2.getColor()) < 10));
+         || (hasColor && c1.getColor() != null && c2.getColor() != null && CColor.getSimilarity(c1.getColor(),c2.getColor()) < 10));
    }
 
    public boolean matches(DynamicJPart future) {
@@ -140,6 +140,12 @@ public class DynamicJPart implements IJsonSerializable {
    }
 
    public DynamicJPart onHover(String... text) {
+      onHoverPlain(text);
+      hoverData = CColor.translateHex('#', CColor.translateAlternateColorCodes('&', hoverData));
+      return this;
+   }
+
+   public DynamicJPart onHoverPlain(String... text) {
       hoverAction = DynamicHoverAction.SHOW_TEXT;
       if(text == null) {
          hoverData = "";

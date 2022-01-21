@@ -4,10 +4,8 @@ import com.google.common.base.Preconditions;
 import org.bukkit.ChatColor;
 
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -112,6 +110,54 @@ public class CColor {
    public static CColor getByChar(char code) {
       return BY_CHAR.get(code);
    }
+
+   public static boolean similarTo(Color c1, Color c2){
+      double distance = (c1.getRed() - c2.getRed())*(c1.getRed() - c2.getRed()) +
+         (c1.getGreen() - c2.getGreen())*(c1.getGreen() - c2.getGreen()) +
+         (c1.getBlue() - c2.getBlue())*(c1.getBlue() - c2.getBlue());
+      return distance <= 20;
+   }
+
+   public static double getSimilarity(Color c1, Color c2){
+      float diffRed   = Math.abs(c1.getRed() - c2.getRed())/255f;
+      float diffGreen = Math.abs(c1.getGreen() - c2.getGreen())/255f;
+      float diffBlue  = Math.abs(c1.getBlue() - c2.getBlue())/255f;
+      return (diffRed + diffGreen + diffBlue) / 3 * 100;
+   }
+
+   public static List<Color> createGradient(int steps, Color start, Color... gradients) {
+      List<Color> gradientList = new ArrayList<>();
+      Color color1 = start;
+      Color color2 = gradients[0];
+      int index = 0;
+      steps = (int) (steps/(gradients.length/1.5));
+      A:for(int i = 0; i <= steps; i++) {
+         float ratio = (float) i / (float) steps;
+         int green = (int) (color2.getGreen() * ratio + color1.getGreen() * (1 - ratio));
+         int blue = (int) (color2.getBlue() * ratio + color1.getBlue() * (1 - ratio));
+         int red = (int) (color2.getRed() * ratio + color1.getRed() * (1 - ratio));
+         Color stepColor = new Color(red, green, blue);
+         if(i == steps-1) {
+            if(index+1 >= gradients.length) break;
+            color1 = color2;
+            color2 = gradients[++index];
+            i = 0;
+            continue;
+         }
+         for(Color gradient : gradientList)
+            if(similarTo(stepColor,gradient)) continue A;
+         if(!gradientList.contains(stepColor))
+            gradientList.add(stepColor);
+      }
+      return gradientList;
+   }
+
+   public static Color[] toJavaColor(CColor... oldColors) {
+      java.awt.Color[] newColors = new java.awt.Color[oldColors.length];
+      for(int i = 0; i < newColors.length; i++) newColors[i] = oldColors[i].getColor();
+      return newColors;
+   }
+
 
    public static CColor of(Color color) {
       return fromHex("#" + String.format("%08x", color.getRGB()).substring(2));
