@@ -60,7 +60,36 @@ I'll show you an example with gradients using normal CommandSender#sendMessage a
 
 This is Bukkit/Spigot when sending a json message:
 ```json
-{"extra":[{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFFF","text":"T"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FEFA","text":"h"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#54FFF2","text":"i"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFEA","text":"s"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#54FFE2","text":" "},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FEDA","text":"i"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFD2","text":"s"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFCA","text":" "},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFC2","text":"a"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFBA","text":" "},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFB2","text":"l"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFAA","text":"o"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFA5","text":"n"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF9D","text":"g"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF95","text":" "},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF8D","text":"t"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF85","text":"e"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF7D","text":"s"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF75","text":"t"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF6D","text":" "},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF65","text":"m"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF5D","text":"e"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF5D","text":"s"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF65","text":"s"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF6D","text":"s"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF75","text":"a"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF7D","text":"g"},{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF85","text":"e"}],"text":""}
+{"extra":[
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFFF","text":"T"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FEFA","text":"h"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#54FFF2","text":"i"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFEA","text":"s"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#54FFE2","text":" "},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FEDA","text":"i"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFD2","text":"s"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFCA","text":" "},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFC2","text":"a"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFBA","text":" "},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFB2","text":"l"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFAA","text":"o"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FFA5","text":"n"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF9D","text":"g"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF95","text":" "},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF8D","text":"t"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF85","text":"e"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF7D","text":"s"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF75","text":"t"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF6D","text":" "},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF65","text":"m"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF5D","text":"e"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF5D","text":"s"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF65","text":"s"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF6D","text":"s"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF75","text":"a"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF7D","text":"g"},
+{"bold":false,"italic":false,"underlined":false,"strikethrough":false,"obfuscated":false,"color":"#55FF85","text":"e"}
+],"text":""}
 ```
 Code used ^:
 ```java
@@ -72,7 +101,16 @@ Player#sendMessage(CColor.translateGradient("This is a long test messsage", CCol
 
 And this is DynamicJson:
 ```json
-{"extra":[{"color":"#55ffff","text":"Thi"},{"color":"#55ffe9","text":"s i"},{"color":"#55ffd0","text":"s a"},{"color":"#55ffb6","text":" lo"},{"color":"#55ff9d","text":"ng "},{"color":"#55ff83","text":"tes"},{"color":"#55ff6a","text":"t mess"},{"color":"#55ff83","text":"age"}],"text":""}
+{"extra":[
+{"color":"#55ffff","text":"Thi"},
+{"color":"#55ffe9","text":"s i"},
+{"color":"#55ffd0","text":"s a"},
+{"color":"#55ffb6","text":" lo"},
+{"color":"#55ff9d","text":"ng "},
+{"color":"#55ff83","text":"tes"},
+{"color":"#55ff6a","text":"t mess"},
+{"color":"#55ff83","text":"age"}
+],"text":""}
 ```
 Code used ^:
 ```java
