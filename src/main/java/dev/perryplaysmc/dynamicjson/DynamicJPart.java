@@ -218,16 +218,12 @@ public class DynamicJPart implements IJsonSerializable {
       try {
          asNMS1 = cbStack.getMethod("asNMSCopy", ItemStack.class);
          save1 = nmsStackC.getMethod("save", cmp);
-      } catch (NoSuchMethodException e) {
-         try {
-            if(asNMS1 == null)
-               asNMS1 = cbStack.getMethod("asNMSCopy", ItemStack.class);
-            if(save1 == null) save1 = nmsStackC.getMethod("b", cmp);
-         } catch (NoSuchMethodException e1) {
-            e1.printStackTrace();
-         }
-         asNMS1 = null;
-         save1 = null;
+      } catch (NoSuchMethodException ignored) {}
+      try {
+         if(asNMS1 == null) asNMS1 = cbStack.getMethod("asNMSCopy", ItemStack.class);
+         if(save1 == null) save1 = nmsStackC.getMethod("b", cmp);
+      } catch (NoSuchMethodException e1) {
+         e1.printStackTrace();
       }
       asNMS = asNMS1;
       save = save1;
