@@ -67,9 +67,8 @@ public class DynamicJsonTest {
   public static void sendParserTest(Player player) {
     //Keys: [gradient, hover, command, suggest, copy, url, insert]
     //Pattern: <key="data">text</key>
-    //gradient has an optional first argument [LEFT, RIGHT, CENTER] (where will the gradient center itself)
     DynamicJText text = DynamicJText.parse(
-        "<gradient=\"left,red,blue\">" +
+        "<gradient=\"red,blue\">" +
         "<command=\"say Hey\">" +
         "<hover=\":D\">" +
         "This is clickable and you can hover" +
