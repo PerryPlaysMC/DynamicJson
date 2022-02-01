@@ -2,7 +2,6 @@ package dev.perryplaysmc.dynamicjson;
 
 import com.google.gson.stream.JsonWriter;
 import dev.perryplaysmc.dynamicjson.data.*;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
@@ -19,7 +18,7 @@ import java.util.Set;
  **/
 
 public class DynamicJPart implements IJsonSerializable {
-
+   
    private String text;
    private DynamicHoverAction hoverAction = DynamicHoverAction.NONE;
    private String hoverData = "";
@@ -28,25 +27,25 @@ public class DynamicJPart implements IJsonSerializable {
    private String insertionData = "";
    private CColor color = null;
    private final Set<DynamicStyle> styles = new HashSet<>(), disabled = new HashSet<>();
-   protected boolean override = false, ignoreHoverClickData = false;
-
+   protected boolean override = false, ignoreHoverClickData = false, isGradient = false;
+   
    public DynamicJPart(String text) {
       this.text = text;
    }
-
+   
    public String getText() {return text;}
-
+   
    public DynamicHoverAction getHoverAction() {return hoverAction;}
    public String getHoverData() {return hoverData;}
-
+   
    public DynamicClickAction getClickAction() {return clickAction;}
    public String getClickActionData() {return clickActionData;}
-
+   
    public String getInsertionData() {return insertionData;}
-
+   
    public Set<DynamicStyle> getStyles() {return new HashSet<>(styles);}
    public CColor getColor() {return color;}
-
+   
    public DynamicJPart copy() {
       DynamicJPart part = new DynamicJPart(text);
       part.insert(insertionData);
@@ -56,133 +55,128 @@ public class DynamicJPart implements IJsonSerializable {
       part.setColor(color);
       return part;
    }
-
-
+   
+   
    protected DynamicJPart disableStyle(DynamicStyle style) {
       disabled.add(style);
       styles.remove(style);
       return this;
    }
-
+   
    protected DynamicJPart removeStyle(DynamicStyle style) {
       styles.remove(style);
       return this;
    }
-
-
+   
+   
    public DynamicJPart addStyle(DynamicStyle style) {
       styles.add(style);
       disabled.remove(style);
       return this;
    }
-
+   
    public DynamicJPart setStyles(List<DynamicStyle> newStyles) {
       return setStyles(new HashSet<>(newStyles));
    }
-
+   
    public DynamicJPart setStyles(Set<DynamicStyle> newStyles) {
       styles.clear();
       styles.addAll(newStyles);
       disabled.removeAll(styles);
       return this;
    }
-
+   
    public DynamicJPart setDisabled(Set<DynamicStyle> newStyles) {
       disabled.clear();
       disabled.addAll(newStyles);
       styles.removeAll(disabled);
       return this;
    }
-
+   
    public DynamicJPart setText(String newText) {
       this.text = newText;
       return this;
    }
-
+   
    public DynamicJPart setColor(CColor color) {
       this.color = color;
       return this;
    }
-
-
+   
+   public boolean isGradient() {
+      return isGradient;
+   }
+   
    public boolean hasEvents() {
       return (getHoverAction() != DynamicHoverAction.NONE && !getHoverData().equals("")) ||
          (getClickAction() != DynamicClickAction.NONE && !getClickActionData().equals("")) ||
          !getInsertionData().equals("");
    }
-
-   public boolean checkColors(DynamicJPart future) {
+   
+   public boolean testColors(DynamicJPart future) {
       CColor c1 = getColor(), c2 = future.getColor();
       boolean hasColor = c1 != null, hasColorF = c2 != null;
       return ((future.getStyles() == null && getStyles() != null) || future.getStyles().containsAll(getStyles()) || (future.getStyles().isEmpty() && getStyles().isEmpty()))
          &&((!hasColor && !hasColorF) || (hasColor && !hasColorF) || (c1 == c2)
-         || (hasColor && c1.getColor() != null && c2.getColor() != null && CColor.getSimilarity(c1.getColor(),c2.getColor()) < 10));
+         || (hasColor && c1.getColor() != null && c2.getColor() != null && CColor.getSimilarity(c1.getColor(),c2.getColor()) <= 2));
    }
-
-   public boolean matches(DynamicJPart future) {
-      return checkColors(future) && isSimilar(future);
-   }
-
-
-
+   
    public boolean isSimilar(DynamicJPart future) {
+      return testColors(future) && hasSimilarData(future);
+   }
+   
+   
+   
+   public boolean hasSimilarData(DynamicJPart future) {
       return (future.getHoverAction() == getHoverAction() &&
          future.getHoverData().equals(getHoverData())) &&
          (future.getClickAction() == getClickAction() &&
             future.getClickActionData().equals(getClickActionData())) &&
          future.getInsertionData().equals(getInsertionData());
    }
-
+   
    public DynamicJPart onHover(DynamicHoverAction action, String value) {
       hoverAction = action;
       hoverData = value;
       return this;
    }
-
+   
    public DynamicJPart onHover(String... text) {
-      onHoverPlain(text);
-      hoverData = CColor.translateHex('#', CColor.translateAlternateColorCodes('&', hoverData));
+      onHover(DynamicHoverAction.SHOW_TEXT, text == null ? "" : CColor.translateAlternateColorCodes('&',
+         CColor.translateHex('#', String.join("\n", text))));
       return this;
    }
-
+   
    public DynamicJPart onHoverPlain(String... text) {
-      hoverAction = DynamicHoverAction.SHOW_TEXT;
-      if(text == null) {
-         hoverData = "";
-         return this;
-      }
-      hoverData = "";
-      for(String s : text) hoverData+=s + "\n";
-      if(hoverData.endsWith("\n")) hoverData = hoverData.substring(0, hoverData.length() - ("\n").length());
+      onHover(DynamicHoverAction.SHOW_TEXT, text == null ? "" : String.join("\n", text));
       return this;
    }
-
+   
    public DynamicJPart onHover(ItemStack item) {
-      hoverAction = DynamicHoverAction.SHOW_ITEM;
-      hoverData = convertItemStack(item);
+      onHover(DynamicHoverAction.SHOW_ITEM, convertItemStack(item));
       return this;
    }
-
+   
    public DynamicJPart onHover(Entity enity) {
-      hoverAction = DynamicHoverAction.SHOW_ENTITY;
-      hoverData = "{\"type\":\"" + enity.getType().name().toLowerCase() + "\",\"id\":" + enity.getUniqueId() + ",\"name\":{\"text\":\"" + enity.getName() + "\"}}";
+      onHover(DynamicHoverAction.SHOW_ENTITY,"{\"type\":\"" +
+         enity.getType().name().toLowerCase() + "\",\"id\":" +
+         enity.getUniqueId() + ",\"name\":{\"text\":\"" + enity.getName() + "\"}}");
       return this;
    }
-
-
-
+   
+   
    public DynamicJPart onClick(DynamicClickAction action, String data) {
       this.clickAction = action;
       this.clickActionData = CColor.stripColor(action == DynamicClickAction.RUN_COMMAND && !data.startsWith("/") ? "/" + data : data);
       return this;
    }
-
+   
    public DynamicJPart insert(String data) {
       this.insertionData = CColor.stripColor(data);
       return this;
    }
-
-
+   
+   
    @Override
    public void toJson(JsonWriter writer, boolean end) throws IOException {
       if(text.equals("") && !override)return;
@@ -194,7 +188,7 @@ public class DynamicJPart implements IJsonSerializable {
       for(DynamicStyle style : disabled) writer.name(style.name().toLowerCase()).value(false);
       if(!ignoreHoverClickData){
          if(!insertionData.isEmpty()) writer.name("insertion").value(insertionData);
-         if(clickAction != DynamicClickAction.NONE && !clickActionData.isEmpty())
+         if(clickAction != null && clickAction != DynamicClickAction.NONE && clickActionData != null && !clickActionData.isEmpty())
             writer.name("clickEvent").beginObject()
                .name("action").value(clickAction.toString().toLowerCase())
                .name("value").value(clickActionData).endObject();
@@ -206,13 +200,13 @@ public class DynamicJPart implements IJsonSerializable {
       }
       if(end) writer.endObject();
    }
-
-
+   
+   
    private final Class<?> nmsStackC = Version.Minecraft.getClass("world.item.ItemStack"),
       cbStack = Version.CraftBukkit.getClass("inventory.CraftItemStack"),
       cmp = Version.Minecraft.getClass("nbt.NBTTagCompound");
    private final Method asNMS, save;
-
+   
    {
       Method asNMS1 = null, save1 = null;
       try {
@@ -228,7 +222,7 @@ public class DynamicJPart implements IJsonSerializable {
       asNMS = asNMS1;
       save = save1;
    }
-
+   
    private String convertItemStack(ItemStack item) {
       try {
          if(item == null) item = new ItemStack(Material.AIR);
@@ -238,7 +232,7 @@ public class DynamicJPart implements IJsonSerializable {
          return "";
       }
    }
-
+   
    @Override
    public String toString() {
       return "DynamicJPart{" +

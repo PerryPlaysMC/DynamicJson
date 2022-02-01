@@ -15,6 +15,12 @@ public enum DynamicClickAction implements Serializable {
   public static DynamicClickAction fromName(String name) {
     for(DynamicClickAction value : values())
       if(value.name().equalsIgnoreCase(name)) return value;
+      switch(name.toLowerCase()) {
+        case "url": return OPEN_URL;
+        case "command": return RUN_COMMAND;
+        case "suggest": return SUGGEST_COMMAND;
+        case "copy": return COPY_TO_CLIPBOARD;
+      }
     return null;
   }
   
