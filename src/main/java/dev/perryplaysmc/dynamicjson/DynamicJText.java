@@ -397,43 +397,50 @@ public class DynamicJText implements IJsonSerializable {
       for(DynamicJPart jPart : parts) if(jPart.isSimilar(EMPTY_PART) && jPart.getText().equals("")) remove.add(jPart);
       parts.removeAll(remove);
       for(int i = 0; i < parts.size(); i++) {
-         DynamicJPart jPart = parts.get(i);
-         if(jPart.isSimilar(EMPTY_PART) && jPart.getText().equals(""))continue;
-         if(i+1 < parts.size() && !jPart.getText().equals("")) {
-            DynamicJPart fut = parts.get(i+1);
-            if(jPart.hasSimilarData(fut) && jPart.hasEvents()) {
-               combine.add(jPart);
+         DynamicJPart current = parts.get(i);
+         if(current.isSimilar(EMPTY_PART) && current.getText().equals(""))continue;
+         if(i+1 < parts.size()) {
+            DynamicJPart future = parts.get(i+1);
+            if(current.hasSimilarData(future) && current.hasEvents()) {
+               combine.add(current);
                if(i+2 < parts.size()) {
                   DynamicJPart jp = parts.get(i+2);
-                  if(!jPart.hasSimilarData(jp)) {
-                     combine.add(fut);
+                  if(!current.hasSimilarData(jp)) {
+                     combine.add(future);
                      writeExtra(writer,combine);
                      i++;
                   }
                }
             }else {
-               if((!jPart.hasEvents() && jPart.isSimilar(fut) && jPart.testColors(fut)) || (jPart.getText().replace(" ","").isEmpty() && !fut.hasEvents())) {
-                  String x = jPart.getText().replace((" "), (""));
-                  jPart.setText(jPart.getText() + fut.getText());
-                  if(x.isEmpty())jPart.setColor(fut.getColor()).setStyles(fut.getStyles());
-                  remove.add(fut);
+               if((!current.hasEvents() && current.isSimilar(future)) || (current.getText().replace(" ","").isEmpty() && !future.hasEvents())) {
+                  String x = current.getText().replace((" "), (""));
+                  current.setText(current.getText() + future.getText());
+                  if(x.isEmpty())current.setColor(future.getColor()).setStyles(future.getStyles());
+                  remove.add(future);
                   i++;
                }
                writeExtra(writer, combine);
-               jPart.toJson(writer,true);
+               current.toJson(writer,true);
             }
          }else {
             writeExtra(writer, combine);
-            jPart.toJson(writer, true);
+            if(current.testColors(EMPTY_PART)) {
+               if(i-1 > -1) {
+                  DynamicJPart previous = parts.get(i-1);
+                  if(previous.getColor()!=null)current.setColor(previous.getColor());
+                  if(!previous.getStyles().isEmpty())current.setStyles(previous.getStyles());
+               }
+            }
+            current.toJson(writer, true);
          }
       }
-      
+
       if(!combine.isEmpty()) writeExtra(writer, combine);
-      
+
       parts.removeAll(remove);
       writer.endArray().endObject();
    }
-   
+
    private void writeExtra(JsonWriter writer, List<DynamicJPart> extra) throws IOException {
       if(extra.size() > 1) {
          DynamicJPart pt = extra.get(0).copy();
@@ -442,7 +449,7 @@ public class DynamicJText implements IJsonSerializable {
          HashMap<DynamicStyle, Integer> stylesMap = new HashMap<>();
          for(DynamicJPart dynamicJPart : extra)
             for(DynamicStyle style : pt.getStyles())
-               if(dynamicJPart.getStyles().contains(style)) stylesMap.put(style, stylesMap.getOrDefault(style, 0) + 1);
+               if(dynamicJPart.getStyles().contains(style)) stylesMap.put(style, stylesMap.getOrDefault(style, (0)) + 1);
          stylesMap.forEach((dynamicStyle, integer) ->{
             if(integer >= (extra.size()/2)) styles.add(dynamicStyle);
          });
@@ -471,11 +478,8 @@ public class DynamicJText implements IJsonSerializable {
             jp.toJson(writer,true);
          }
          writer.endArray().endObject();
-      }else {
-         if(extra.size() == 1) {
-            extra.get(0).toJson(writer,true);
-         }
-      }
+      }else if(extra.size() == 1)
+         extra.get(0).toJson(writer,true);
       extra.clear();
    }
    
@@ -601,17 +605,17 @@ public class DynamicJText implements IJsonSerializable {
    
    private static final Pattern PARSE_PATTERN = Pattern.compile(PARSE_REGEX, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
    private static final List<String> PARSE_IDS = Arrays.asList("hover", "command", "copy", "suggest", "insert", "url", "gradient");
-   
+
    public static DynamicJText parse(String text) {
       DynamicJText jText = new DynamicJText();
-      parse(jText, text,null,null,null,null, null, null,null);
+      parse(jText, text,null,null,null,null,null);
       return jText;
    }
-   
-   private static void parse(DynamicJText jText, String text, String hover, String command, String suggest, String copy, String insert, String url, String gradient) {
+
+   private static void parse(DynamicJText jText, String text, String hover, DynamicClickAction action, String clickData, String insert, String gradient) {
       Matcher matcher = PARSE_PATTERN.matcher(text);
       boolean foundAny = matcher.find();
-      
+
       String build = "";
       char[] chars = text.toCharArray();
       for(int i = 0; i < chars.length; i++) {
@@ -623,7 +627,7 @@ public class DynamicJText implements IJsonSerializable {
                String nText = matcher.group("text");
                if(!PARSE_IDS.contains(id.toLowerCase())) {
                   foundAny = matcher.find();
-                  i=i-1;
+                  i--;
                   continue;
                }
                int bd = build.length();
@@ -636,7 +640,7 @@ public class DynamicJText implements IJsonSerializable {
                            for(int i1 = 0; i1 < split.length; i1++) colors[i1] = CColor.fromTranslated(split[i1]);
                            jText.gradientBuilder(colors).add(build);
                         }else jText.add(build);
-                        append(jText, hover, command, suggest, copy, insert, url);
+                        append(jText, hover, action, clickData, insert);
                         build = "";
                      }
                   }
@@ -652,38 +656,36 @@ public class DynamicJText implements IJsonSerializable {
                }
                if(newFound) {
                   switch(id.toLowerCase()){
-                     case "hover": parse(jText, nText, data, command, suggest, copy, insert, url, gradient);
+                     case "hover": parse(jText, nText, hover=data,action,clickData, insert, gradient);
                         break;
-                     case "command": parse(jText, nText, hover, data, null, null, insert, null, gradient);
+                     case "insert": parse(jText, nText, hover, action,clickData, insert=data, gradient);
                         break;
-                     case "suggest": parse(jText, nText, hover, null, data, null, insert, null, gradient);
+                     case "gradient": parse(jText, nText, hover, action, clickData, insert, data);
+                        jText.gradientBuilder().finish();
                         break;
-                     case "copy": parse(jText, nText, hover, null, null, data, insert, null, gradient);
-                        break;
-                     case "insert": parse(jText, nText, hover, command, suggest, copy, data, url, gradient);
-                        break;
-                     case "url": parse(jText, nText, hover, null, null, null, insert, data, gradient);
-                        break;
-                     case "gradient": parse(jText, nText, hover, command, suggest, copy, insert, url, data);
+                     default:
+                        DynamicClickAction cAction = DynamicClickAction.fromName(id);
+                        if(cAction != null)
+                           parse(jText,nText,hover,cAction,data,insert,gradient);
                         break;
                   }
-                  append(jText, hover, command, suggest, copy, insert, url);
+                  append(jText, hover, action, clickData, insert);
                }else {
-                  append(jText, hover, command, suggest, copy, insert, url);
+                  append(jText, hover, action, clickData, insert);
                   switch(id.toLowerCase()){
                      case "hover": if(jText.gradientBuilder() == null) jText.onHover(data); else jText.gradientBuilder().onHoverPlain(data);
                         break;
                      case "insert": if(jText.gradientBuilder() == null) jText.insert(data); else jText.gradientBuilder().insert(data);
                         break;
                      default:
-                        DynamicClickAction action = DynamicClickAction.fromName(id);
-                        if(action != null)
-                           if(jText.gradientBuilder() == null) jText.onClick(action, data);
-                           else jText.gradientBuilder().onClick(action, data);
+                        DynamicClickAction cAction = DynamicClickAction.fromName(id);
+                        if(cAction != null)
+                           if(jText.gradientBuilder() == null) jText.onClick(cAction, data);
+                           else jText.gradientBuilder().onClick(cAction, data);
                         break;
                   }
+                  if(id.equalsIgnoreCase("gradient"))jText.gradientBuilder().finish();
                }
-               hover = null;copy = null;command = null;suggest = null;gradient = null;insert = null;url = null;
                i = matcher.end()-1;
                foundAny = matcher.find();
                continue;
@@ -700,26 +702,20 @@ public class DynamicJText implements IJsonSerializable {
                   for(int i1 = 0; i1 < split.length; i1++) colors[i1] = CColor.fromTranslated(split[i1]);
                   jText.gradientBuilder(colors).add(build);
                }else jText.add(build);
-               append(jText, hover, command, suggest, copy, insert, url);
+               append(jText, hover, action, clickData, insert);
             }
          }
    }
-   
-   private static void append(DynamicJText jText, String hover, String command, String suggest, String copy, String insert, String url) {
+
+   private static void append(DynamicJText jText, String hover, DynamicClickAction action, String clickData, String insert) {
       if(jText.gradientBuilder == null) {
          if(hover != null) jText.onHover(hover);
-         if(copy != null) jText.copy(copy);
-         if(command != null) jText.command(command);
-         if(suggest != null) jText.suggest(suggest);
+         if(action != null) jText.onClick(action, clickData);
          if(insert != null) jText.insert(insert);
-         if(url != null) jText.url(url);
       }else {
          if(hover != null) jText.gradientBuilder().onHover(hover);
-         if(copy != null) jText.gradientBuilder().copy(copy);
-         if(command != null) jText.gradientBuilder().command(command);
-         if(suggest != null) jText.gradientBuilder().suggest(suggest);
+         if(action != null) jText.gradientBuilder().onClick(action, clickData);
          if(insert != null) jText.gradientBuilder().insert(insert);
-         if(url != null) jText.gradientBuilder().url(url);
       }
    }
    

@@ -18,9 +18,9 @@ import java.util.List;
 
 public class GradientBuilder {
   
-  private List<DynamicJPart> gradients;
-  private CColor[] colors;
-  private DynamicJText jText;
+  private final List<DynamicJPart> gradients;
+  private final CColor[] colors;
+  private final DynamicJText jText;
   private CColor.GradientCenter gradientCenter = CColor.GradientCenter.CENTER;
   
   protected static GradientBuilder create(DynamicJText jText, CColor... colors) {

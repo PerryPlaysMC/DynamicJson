@@ -102,32 +102,32 @@ public class DynamicJPart implements IJsonSerializable {
       this.color = color;
       return this;
    }
-   
+
    public boolean isGradient() {
       return isGradient;
    }
-   
+
    public boolean hasEvents() {
       return (getHoverAction() != DynamicHoverAction.NONE && !getHoverData().equals("")) ||
          (getClickAction() != DynamicClickAction.NONE && !getClickActionData().equals("")) ||
          !getInsertionData().equals("");
    }
-   
+
    public boolean testColors(DynamicJPart future) {
       CColor c1 = getColor(), c2 = future.getColor();
       boolean hasColor = c1 != null, hasColorF = c2 != null;
-      return ((future.getStyles() == null && getStyles() != null) || future.getStyles().containsAll(getStyles()) || (future.getStyles().isEmpty() && getStyles().isEmpty()))
-         &&((!hasColor && !hasColorF) || (hasColor && !hasColorF) || (c1 == c2)
-         || (hasColor && c1.getColor() != null && c2.getColor() != null && CColor.getSimilarity(c1.getColor(),c2.getColor()) <= 2));
+      return ((future.getStyles() == null && getStyles() != null) ||
+         (future.getStyles().isEmpty() && getStyles().isEmpty()) || future.getStyles().containsAll(getStyles()))
+         &&((!hasColor && !hasColorF) || (hasColor && !hasColorF) || (c1 == c2) ||
+         (hasColor && c1.getColor() != null && c2.getColor() != null && CColor.getSimilarity(c1.getColor(),c2.getColor()) <= 2));
    }
-   
+
    public boolean isSimilar(DynamicJPart future) {
       return testColors(future) && hasSimilarData(future);
    }
-   
-   
-   
+
    public boolean hasSimilarData(DynamicJPart future) {
+      if(future == null) return false;
       return (future.getHoverAction() == getHoverAction() &&
          future.getHoverData().equals(getHoverData())) &&
          (future.getClickAction() == getClickAction() &&
