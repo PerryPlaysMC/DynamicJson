@@ -1,7 +1,7 @@
 # DynamicJson
 Simple util for Json messages (Works on books too!)
  
-  
+[Join the discord to be notified of updates!](https://discord.gg/QuG8R6c3ry)
  
 
  
