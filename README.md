@@ -92,7 +92,7 @@ public class DynamicJsonTest {
 ```
 
 # Maven
-```maven
+```xml
 <repository>
  <id>jitpack.io</id>
  <url>https://jitpack.io</url>
