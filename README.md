@@ -92,7 +92,7 @@ public class DynamicJsonTest {
 ```
 
 # Maven
-```maven
+```xml
 <repository>
  <id>jitpack.io</id>
  <url>https://jitpack.io</url>
@@ -102,7 +102,7 @@ public class DynamicJsonTest {
 <dependency>
  <groupId>com.github.PerryPlaysMC</groupId>
  <artifactId>DynamicJson</artifactId>
- <version>v1.2.0</version>
+ <version>v1.2.2</version>
 </dependency>
 ```
 [![](https://jitpack.io/v/PerryPlaysMC/DynamicJson.svg)](https://jitpack.io/#PerryPlaysMC/DynamicJson)
