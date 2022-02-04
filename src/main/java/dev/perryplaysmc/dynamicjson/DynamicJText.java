@@ -34,10 +34,12 @@ public class DynamicJText implements IJsonSerializable {
 
    private static final DynamicJPart EMPTY_PART = new DynamicJPart("");
 
-   private final String colorRegex = "(?:(§[mnolkr])*(#[a-fA-F0-9]{6}|§[0-9abcdefr])*(§[mnolkr])*)?((?:(?![#][a-fA-F0-9]{6})(?!§(?:[mnolkr]|[0-9abcdefr])).)*)";
-   private final String hexRegex = "§[x](?:§[a-fA-F0-9]){6}";
-   private final Pattern COLOR_PATTERN = Pattern.compile(colorRegex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
-   private final Pattern HEX_PATTERN = Pattern.compile(hexRegex, Pattern.CASE_INSENSITIVE);
+   private static final String colorRegex = "(?:(§[mnolkr])*(#[a-fA-F0-9]{6}|§[0-9abcdefr])*(§[mnolkr])*)?((?:(?![#][a-fA-F0-9]{6})(?!§(?:[mnolkr]|[0-9abcdefr])).)*)";
+   private static final String hexRegex = "§[x](?:§[a-fA-F0-9]){6}";
+   private static final Pattern COLOR_PATTERN = Pattern.compile(colorRegex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
+   private static final Pattern HEX_PATTERN = Pattern.compile(hexRegex, Pattern.CASE_INSENSITIVE);
+   private boolean clean = false;
+   private String jsonText = "", plainText = "";
    private List<DynamicJPart> parts = new ArrayList<>();
    private List<DynamicJPart> currentEdits;
    private Set<DynamicStyle> toNextS = null;
@@ -97,7 +99,7 @@ public class DynamicJText implements IJsonSerializable {
       }
       currentEdits = new ArrayList<>();
       currentEdits.add(part);
-      return this;
+      return dirtify();
    }
 
    public DynamicJText addPlain(String text) {
@@ -117,7 +119,7 @@ public class DynamicJText implements IJsonSerializable {
          toNextS = null;
       }
       createDynamicJParts(text);
-      return this;
+      return dirtify();
    }
 
    public GradientBuilder gradient(CColor... colors) {
@@ -128,6 +130,7 @@ public class DynamicJText implements IJsonSerializable {
 
    public GradientBuilder gradient(String text, CColor... colors) {
       Validate.isTrue(colors.length > 1, "You must have at least 2 colors for the gradient to work!");
+      dirtify();
       return gradientBuilder = GradientBuilder.create(this, colors).add(text);
    }
 
@@ -158,24 +161,24 @@ public class DynamicJText implements IJsonSerializable {
       for(DynamicJPart part : dynamicJText.parts)
          if(!parts.contains(part)) parts.add(part);
       currentEdits = new ArrayList<>();
-      return this;
+      return dirtify();
    }
 
 
    public DynamicJText addReset(String text) {
       applyToNext(getPrevious().getStyles()).applyToNext(getPrevious().getColor())
          .createDynamicJParts(CColor.translateCommon(text));
-      return this;
+      return dirtify();
    }
 
    private DynamicJText applyToNext(Set<DynamicStyle> styles) {
       toNextS = styles;
-      return this;
+      return dirtify();
    }
 
    private DynamicJText applyToNext(CColor color) {
       toNextC = color;
-      return this;
+      return dirtify();
    }
 
    private String changeHex(String hex) {
@@ -263,28 +266,28 @@ public class DynamicJText implements IJsonSerializable {
    public DynamicJText onHover(ItemStack item) {
       Validate.notNull(item);
       currentEdits.forEach(edit -> edit.onHover(item));
-      return this;
+      return dirtify();
    }
 
    public DynamicJText onHover(Entity entity) {
       Validate.notNull(entity);
       currentEdits.forEach(edit -> edit.onHover(entity));
-      return this;
+      return dirtify();
    }
 
    public DynamicJText onHover(String... text) {
       currentEdits.forEach(edit -> edit.onHover(text));
-      return this;
+      return dirtify();
    }
 
    public DynamicJText onHoverPlain(String... text) {
       currentEdits.forEach(edit -> edit.onHoverPlain(text));
-      return this;
+      return dirtify();
    }
 
    public DynamicJText onHover(DynamicHoverAction action, String... text) {
       currentEdits.forEach(edit -> edit.onHover(action, String.join("\n", text)));
-      return this;
+      return dirtify();
    }
 
 
@@ -303,7 +306,7 @@ public class DynamicJText implements IJsonSerializable {
 
    public DynamicJText insert(String text) {
       currentEdits.forEach(edit -> edit.insert(text));
-      return this;
+      return dirtify();
    }
 
    public DynamicJText copy(String text) {
@@ -316,7 +319,7 @@ public class DynamicJText implements IJsonSerializable {
 
    public DynamicJText onClick(DynamicClickAction action, String text) {
       currentEdits.forEach(edit -> edit.onClick(action, text));
-      return this;
+      return dirtify();
    }
 
 
@@ -324,22 +327,29 @@ public class DynamicJText implements IJsonSerializable {
       if(color == CColor.STRIKETHROUGH || color == CColor.BOLD || color == CColor.MAGIC || color == CColor.ITALIC || color == CColor.UNDERLINE)
          throw new IllegalArgumentException("Invalid CColor!");
       currentEdits.forEach(edit -> edit.setColor(color));
-      return this;
+      return dirtify();
    }
 
    public DynamicJText addStyle(DynamicStyle... styles) {
       for(DynamicStyle style : styles) currentEdits.forEach(edit -> edit.addStyle(style));
+      return dirtify();
+   }
+   
+   protected DynamicJText dirtify() {
+      clean = false;
       return this;
    }
 
 
    public String toJsonString() {
+      if(clean && !jsonText.isEmpty()) return jsonText;
       StringWriter sWriter = new StringWriter();
       JsonWriter jWriter = new JsonWriter(sWriter);
       try {
          toJson(jWriter, true);
          jWriter.close();
-         return sWriter.toString();
+         clean = true;
+         return (jsonText = sWriter.toString());
       } catch (IOException e) {
          e.printStackTrace();
       }
@@ -352,6 +362,7 @@ public class DynamicJText implements IJsonSerializable {
    }
 
    public String toPlainText() {
+      if(clean && !plainText.isEmpty()) return plainText;
       if(!currentEdits.isEmpty()) {
          for(DynamicJPart currentEdit : currentEdits) if(!parts.contains(currentEdit)) parts.add(currentEdit);
          currentEdits.clear();
@@ -368,7 +379,8 @@ public class DynamicJText implements IJsonSerializable {
          for(DynamicStyle s : part.getStyles()) styles += s.getAsColor().toString();
          text += (part.getColor() != null ? part.getColor() : "") + styles + part.getText();
       }
-      return text;
+      clean = true;
+      return plainText = text;
    }
 
    public DynamicJText clone() {

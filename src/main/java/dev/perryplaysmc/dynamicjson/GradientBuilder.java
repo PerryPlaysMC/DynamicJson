@@ -40,38 +40,45 @@ public class GradientBuilder {
   public GradientBuilder add(String text) {
     gradients.add(new DynamicJPart(text));
     gradients.get(gradients.size()-1).isGradient = true;
+     jText.dirtify();
     return this;
   }
   
   public GradientBuilder addDefault(String text) {
     gradients.add(new DynamicJPart(text));
+     jText.dirtify();
     return this;
   }
   
   public GradientBuilder onHover(ItemStack item) {
     Validate.notNull(item);
     if(gradients.size() > 0) gradients.get(gradients.size()-1).onHover(item);
+     jText.dirtify();
     return this;
   }
   
   public GradientBuilder onHover(Entity entity) {
     Validate.notNull(entity);
     if(gradients.size() > 0) gradients.get(gradients.size()-1).onHover(entity);
+     jText.dirtify();
     return this;
   }
   
   public GradientBuilder onHover(String... text) {
     if(gradients.size() > 0) gradients.get(gradients.size()-1).onHover(text);
+     jText.dirtify();
     return this;
   }
   
   public GradientBuilder onHoverPlain(String... text) {
     if(gradients.size() > 0) gradients.get(gradients.size()-1).onHoverPlain(text);
+     jText.dirtify();
     return this;
   }
   
   public GradientBuilder onHover(DynamicHoverAction action, String... text) {
     if(gradients.size() > 0) gradients.get(gradients.size()-1).onHover(action, String.join("\n",text));
+     jText.dirtify();
     return this;
   }
   
@@ -91,6 +98,7 @@ public class GradientBuilder {
   
   public GradientBuilder insert(String text) {
     if(gradients.size() > 0) gradients.get(gradients.size()-1).insert(text);
+     jText.dirtify();
     return this;
   }
   
@@ -104,6 +112,7 @@ public class GradientBuilder {
   
   public GradientBuilder onClick(DynamicClickAction action, String text) {
     if(gradients.size() > 0) gradients.get(gradients.size()-1).onClick(action,text);
+     jText.dirtify();
     return this;
   }
   
@@ -121,6 +130,7 @@ public class GradientBuilder {
       jText.insert(dynamicJPart.getInsertionData());
     }
     gradients.clear();
+     jText.dirtify();
     return jText;
   }
   
