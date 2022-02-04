@@ -21,7 +21,7 @@ public enum DynamicClickAction implements Serializable {
         case "suggest": return SUGGEST_COMMAND;
         case "copy": return COPY_TO_CLIPBOARD;
       }
-    return null;
+    return NONE;
   }
   
   

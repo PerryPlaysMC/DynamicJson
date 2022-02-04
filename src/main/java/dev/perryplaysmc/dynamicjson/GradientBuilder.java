@@ -6,7 +6,6 @@ import dev.perryplaysmc.dynamicjson.data.DynamicHoverAction;
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,7 @@ public class GradientBuilder {
   private final List<DynamicJPart> gradients;
   private final CColor[] colors;
   private final DynamicJText jText;
-  private CColor.GradientCenter gradientCenter = CColor.GradientCenter.CENTER;
+  private CColor.GradientCenter gradientCenter = CColor.GradientCenter.MIDDLE;
   
   protected static GradientBuilder create(DynamicJText jText, CColor... colors) {
     return new GradientBuilder(jText, colors);
@@ -114,9 +113,9 @@ public class GradientBuilder {
     int initialStep = 0;
     for(DynamicJPart dynamicJPart : gradients) {
       if(dynamicJPart.isGradient()){
-        jText.findColors(CColor.translateGradient(dynamicJPart.getText(), gradientCenter, totalLength, initialStep, colors));
+        jText.createDynamicJParts(CColor.translateGradient(dynamicJPart.getText(), gradientCenter, totalLength, initialStep, colors));
         initialStep+=dynamicJPart.getText().length();
-      }else jText.findColors(CColor.translateAlternateColorCodes('&', CColor.translateHex('&', dynamicJPart.getText())));
+      }else jText.createDynamicJParts(CColor.translateCommon(dynamicJPart.getText()));
       jText.onClick(dynamicJPart.getClickAction(), dynamicJPart.getClickActionData());
       jText.onHover(dynamicJPart.getHoverAction(), dynamicJPart.getHoverData());
       jText.insert(dynamicJPart.getInsertionData());

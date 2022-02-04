@@ -18,7 +18,8 @@ public enum DynamicStyle implements Serializable {
     return list;
   }
   
-  CColor style;
+  private final CColor style;
+
   DynamicStyle(CColor style) {
     this.style = style;
   }
