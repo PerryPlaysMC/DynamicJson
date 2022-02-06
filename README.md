@@ -65,8 +65,9 @@ public class DynamicJsonTest {
   }
 
   public static void sendParserTest(Player player) {
-    //Keys: [gradient, hover, command, suggest, copy, url, insert]
-    //Pattern: <key="data">text</key>
+    //Keys: [gradient, hover, command, chat, suggest, copy, url, insert]
+    //Pattern: <key="data use backslash quote \" to have quotes in the data\"">text</key>
+    //For it to work in in code you have to tripple backslash quote \\\" 
     DynamicJText text = DynamicJText.parse(
         "<gradient=\"red,blue\">" +
         "<command=\"say Hey\">" +
