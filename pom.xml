@@ -6,20 +6,12 @@
 
     <groupId>dev.perryplaysmc.dynamicjson</groupId>
     <artifactId>DynamicJson</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
-
-
-    <repositories>
-        <repository>
-            <id>Spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>

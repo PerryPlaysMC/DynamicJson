@@ -334,7 +334,7 @@ public class DynamicJText implements IJsonSerializable {
       for(DynamicStyle style : styles) currentEdits.forEach(edit -> edit.addStyle(style));
       return dirtify();
    }
-   
+
    protected DynamicJText dirtify() {
       clean = false;
       return this;
@@ -508,7 +508,6 @@ public class DynamicJText implements IJsonSerializable {
       return toJsonString();
    }
 
-
    public void send(CommandSender sender, String json) {
       sender.spigot().sendMessage(ComponentSerializer.parse(json));
    }
@@ -535,31 +534,44 @@ public class DynamicJText implements IJsonSerializable {
 
 
    public static DynamicJText fromComponents(BaseComponent[] comp) {
-      return fromJson(ComponentSerializer.toString(comp));
+      return parseJson(ComponentSerializer.toString(comp));
    }
 
+   /**
+    * @deprecated This is being renamed to #parseJson. And #fromJson will be removed in the next major version update (v1.3.0)
+    * @param json the Json string to parse
+    * @return DynamicJText
+    */
+   @Deprecated
    public static DynamicJText fromJson(String json) {
+      return parseJson(json);
+   }
+
+   public static DynamicJText parseJson(String json) {
       try {
-         return fromExtra(parseJsonString(json).getAsJsonObject());
+         return parseJArray(parseJsonString(json));
       } catch (Exception e) {
+         e.printStackTrace();
          return new DynamicJText("Failed to parse: \n" + json);
       }
    }
 
-   private static DynamicJText fromExtra(JsonObject object) {
+   private static DynamicJText parseJArray(JsonElement object) {
       DynamicJText ret = new DynamicJText();
       {
-         DynamicJPart fromJ = fromJObject(object);
-         if(fromJ != null) ret.add(fromJ);
+         if(object.isJsonObject()) {
+            DynamicJPart fromJ = parseJObect(object.getAsJsonObject());
+            if(fromJ != null) ret.add(fromJ);
+         }
       }
-      if(object.has("extra")) {
-         JsonArray arr = object.get("extra").getAsJsonArray();
+      if(object.isJsonArray() || (object.isJsonObject() && object.getAsJsonObject().has(("extra")))) {
+         JsonArray arr = object.isJsonArray() ? object.getAsJsonArray() : object.getAsJsonObject().get("extra").getAsJsonArray();
          for(int i = 0; i < arr.size(); i++) {
             JsonObject jO = arr.get(i).getAsJsonObject();
             if(jO.has("extra")) {
                DynamicJText text = new DynamicJText();
-               DynamicJPart part = fromJObject(jO);
-               DynamicJText add = fromExtra(jO);
+               DynamicJPart part = parseJObect(jO);
+               DynamicJText add = parseJArray(jO);
                if(part != null) {
                   text.add(part);
                   if(part.getText().isEmpty()) {
@@ -580,7 +592,7 @@ public class DynamicJText implements IJsonSerializable {
                text.add(add);
                ret.add(text);
             } else {
-               DynamicJPart fromJ = fromJObject(jO);
+               DynamicJPart fromJ = parseJObect(jO);
                if(fromJ != null) ret.add(fromJ);
             }
          }
@@ -588,8 +600,7 @@ public class DynamicJText implements IJsonSerializable {
       return ret;
    }
 
-
-   private static DynamicJPart fromJObject(JsonObject jObject) {
+   private static DynamicJPart parseJObect(JsonObject jObject) {
       if(!jObject.has("text")) return null;
       DynamicJPart part = new DynamicJPart(jObject.get("text").getAsString());
       if(jObject.has("color"))
@@ -603,7 +614,7 @@ public class DynamicJText implements IJsonSerializable {
             if(get != null)
                if(get instanceof JsonArray)
                   for(JsonElement jsonElement : get.getAsJsonArray()) {
-                     DynamicJPart jp = fromJObject(jsonElement.getAsJsonObject());
+                     DynamicJPart jp = parseJObect(jsonElement.getAsJsonObject());
                      if(jp != null) val += jp.getHoverData() + "\n";
                   }
                else val = get.getAsString();
@@ -621,7 +632,6 @@ public class DynamicJText implements IJsonSerializable {
    }
 
    private static final String PARSE_REGEX = "((<(?<id>[^=]+)=\\\"(?<data>(?:(?=\\\\\\\")..|(?!\\\").)*)\\\">)(?<text>(?:(?!</\\k<id>).)*(?:(?!>(?:[\\s]|[.])).)*)</\\k<id>>)";
-
 
    private static final Pattern PARSE_PATTERN = Pattern.compile(PARSE_REGEX, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
    private static final List<String> PARSE_IDS = Arrays.asList("hover", "command", "chat", "copy", "suggest", "insert", "url", "gradient");
