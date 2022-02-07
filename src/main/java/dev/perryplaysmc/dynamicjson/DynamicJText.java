@@ -21,8 +21,10 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Owner: PerryPlaysMC
@@ -45,6 +47,7 @@ public class DynamicJText implements IJsonSerializable {
    private Set<DynamicStyle> toNextS = null;
    private CColor toNextC = null;
    private GradientBuilder gradientBuilder = null;
+   private HashMap<String, Function<CommandSender, String>> replacements = new HashMap<>();
 
 
    public DynamicJText(DynamicJPart text) {
@@ -290,6 +293,11 @@ public class DynamicJText implements IJsonSerializable {
       return dirtify();
    }
 
+   public DynamicJText replace(String text, Function<CommandSender, String> replacement) {
+      replacements.put(text,replacement);
+      return this;
+   }
+
 
    public DynamicJText chat(String text) {
       return onClick(DynamicClickAction.RUN_COMMAND, text);
@@ -508,7 +516,22 @@ public class DynamicJText implements IJsonSerializable {
       return toJsonString();
    }
 
+   private static final String REPLACEMENT_SEARCH_REGEX = "\\{?\\\"(?:text|value)\\\":\\s*\\\"(?<data>(?:(?=\\\\\\\")..|(?!\\\").)*)\\\"";
+   private static final Pattern REPLACEMENT_SEARCH = Pattern.compile(REPLACEMENT_SEARCH_REGEX);
+
    public void send(CommandSender sender, String json) {
+      for(Map.Entry<String, Function<CommandSender, String>> replacement : replacements.entrySet()) {
+         Matcher matcher = REPLACEMENT_SEARCH.matcher(json);
+         while(matcher.find()) {
+            String text = matcher.group(1);
+            int start = matcher.start(1);
+            int end = matcher.end(1);
+            if(text.contains(replacement.getKey())) {
+               json = json.substring(0, start) + text.replace(replacement.getKey(),replacement.getValue().apply(sender)) + json.substring(end);
+               matcher = REPLACEMENT_SEARCH.matcher(json);
+            }
+         }
+      }
       sender.spigot().sendMessage(ComponentSerializer.parse(json));
    }
 
@@ -567,7 +590,13 @@ public class DynamicJText implements IJsonSerializable {
       if(object.isJsonArray() || (object.isJsonObject() && object.getAsJsonObject().has(("extra")))) {
          JsonArray arr = object.isJsonArray() ? object.getAsJsonArray() : object.getAsJsonObject().get("extra").getAsJsonArray();
          for(int i = 0; i < arr.size(); i++) {
-            JsonObject jO = arr.get(i).getAsJsonObject();
+            JsonElement ele = arr.get(i);
+
+            if(ele.isJsonPrimitive()) {
+               ret.add(ele.getAsString());
+               continue;
+            }
+            JsonObject jO = ele.getAsJsonObject();
             if(jO.has("extra")) {
                DynamicJText text = new DynamicJText();
                DynamicJPart part = parseJObect(jO);
@@ -615,9 +644,14 @@ public class DynamicJText implements IJsonSerializable {
                if(get instanceof JsonArray)
                   for(JsonElement jsonElement : get.getAsJsonArray()) {
                      DynamicJPart jp = parseJObect(jsonElement.getAsJsonObject());
-                     if(jp != null) val += jp.getHoverData() + "\n";
+                     if(jp != null) val += jp.getColor() +
+                        jp.getStyles().stream().map(s -> s.getAsColor().toString()).collect(Collectors.joining()) + jp.getText() + "\n";
                   }
-               else val = get.getAsString();
+               else if(get instanceof JsonObject) {
+                  DynamicJPart jp = parseJObect(get.getAsJsonObject());
+                  if(jp != null) val += (jp.getColor() == null ? "" : jp.getColor()) +
+                     jp.getStyles().stream().map(s -> s.getAsColor().toString()).collect(Collectors.joining()) + jp.getText() + "\n";
+               }else val = get.getAsString();
             val = val.trim();
             part.onHover(DynamicHoverAction.valueOf(he.get("action").getAsString().toUpperCase()), val);
          }
