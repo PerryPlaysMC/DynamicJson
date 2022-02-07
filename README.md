@@ -87,6 +87,13 @@ public class DynamicJsonTest {
     );
     text.send(player); 
   }
+  
+  public static void sendReplacerTest(Player player) {
+    DynamicJText json = new DynamicJText("&cHello &b%player_name%!");
+    json.replace("%player_name%", CommandSender::getName);
+
+    json.send(player);
+  }
 
 
 }
@@ -103,7 +110,7 @@ public class DynamicJsonTest {
 <dependency>
  <groupId>com.github.PerryPlaysMC</groupId>
  <artifactId>DynamicJson</artifactId>
- <version>v1.2.3</version>
+ <version>v1.3.0</version>
 </dependency>
 ```
 [![](https://jitpack.io/v/PerryPlaysMC/DynamicJson.svg)](https://jitpack.io/#PerryPlaysMC/DynamicJson)
