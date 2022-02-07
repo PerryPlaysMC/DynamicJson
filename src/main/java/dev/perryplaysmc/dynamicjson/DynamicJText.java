@@ -560,16 +560,6 @@ public class DynamicJText implements IJsonSerializable {
       return parseJson(ComponentSerializer.toString(comp));
    }
 
-   /**
-    * @deprecated This is being renamed to #parseJson. And #fromJson will be removed in the next major version update (v1.3.0)
-    * @param json the Json string to parse
-    * @return DynamicJText
-    */
-   @Deprecated
-   public static DynamicJText fromJson(String json) {
-      return parseJson(json);
-   }
-
    public static DynamicJText parseJson(String json) {
       try {
          return parseJArray(parseJsonString(json));
