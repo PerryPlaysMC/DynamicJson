@@ -31,7 +31,8 @@ public class CColor {
    public static final CColor DARK_AQUA = new CColor('3', "dark_aqua", new Color(43690));
    public static final CColor DARK_RED = new CColor('4', "dark_red", new Color(11141120));
    public static final CColor DARK_PURPLE = new CColor('5', "dark_purple", new Color(11141290));
-   public static final CColor ORANGE = new CColor('6', "orange", new Color(16755200));
+   public static final CColor GOLD = new CColor('6', "gold", new Color(16755200));
+   public static final CColor ORANGE = new CColor('g', "orange", new Color(16755200));
    public static final CColor GRAY = new CColor('7', "gray", new Color(11184810));
    public static final CColor DARK_GRAY = new CColor('8', "dark_gray", new Color(5592405));
    public static final CColor BLUE = new CColor('9', "blue", new Color(5592575));
