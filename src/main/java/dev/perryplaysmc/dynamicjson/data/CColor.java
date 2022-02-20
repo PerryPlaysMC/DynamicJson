@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 public class CColor {
    public static final char COLOR_CHAR = ChatColor.COLOR_CHAR;
    public static final String ALL_CODES = "0123456789AaBbCcDdEeFfKkLlMmNnOoRrXx";
-   public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile(COLOR_CHAR + "[0-9A-FK-ORX]", Pattern.CASE_INSENSITIVE);
+   public static final Pattern STRIP_COLOR_PATTERN = Pattern.compile(COLOR_CHAR + "[\\dA-FK-ORX]", Pattern.CASE_INSENSITIVE);
 
-   private static final String hexRegex = "(?:§[x](?:§[a-fA-F0-9]){6})";
+   private static final String hexRegex = "(?:§x(?:§[a-fA-F\\d]){6})";
    private static final Pattern HEX_PATTERN = Pattern.compile(hexRegex, Pattern.CASE_INSENSITIVE);
 
    private static final Map<Character, Pattern> CHAT_COLOR_PATTERN_CACHE = new HashMap<>();

@@ -36,8 +36,8 @@ public class DynamicJText implements IJsonSerializable {
 
    private static final DynamicJPart EMPTY_PART = new DynamicJPart("");
 
-   private static final String colorRegex = "(?:(§[mnolkr])*(#[a-fA-F0-9]{6}|§[0-9abcdefr])*(§[mnolkr])*)?((?:(?![#][a-fA-F0-9]{6})(?!§(?:[mnolkr]|[0-9abcdefr])).)*)";
-   private static final String hexRegex = "§[x](?:§[a-fA-F0-9]){6}";
+   private static final String colorRegex = "(?:(§[mnolkr])*(#[a-fA-F\\d]{6}|§[\\dabcdefr])*(§[mnolkr])*)?((?:(?!#[a-fA-F\\d]{6})(?!§(?:[mnolkr]|[\\dabcdefr])).)*)";
+   private static final String hexRegex = "§x(?:§[a-fA-F\\d]){6}";
    private static final Pattern COLOR_PATTERN = Pattern.compile(colorRegex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL);
    private static final Pattern HEX_PATTERN = Pattern.compile(hexRegex, Pattern.CASE_INSENSITIVE);
    private boolean clean = false;
@@ -573,7 +573,7 @@ public class DynamicJText implements IJsonSerializable {
       DynamicJText ret = new DynamicJText();
       {
          if(object.isJsonObject()) {
-            DynamicJPart fromJ = parseJObect(object.getAsJsonObject());
+            DynamicJPart fromJ = parseJObject(object.getAsJsonObject());
             if(fromJ != null) ret.add(fromJ);
          }
       }
@@ -589,7 +589,7 @@ public class DynamicJText implements IJsonSerializable {
             JsonObject jO = ele.getAsJsonObject();
             if(jO.has("extra")) {
                DynamicJText text = new DynamicJText();
-               DynamicJPart part = parseJObect(jO);
+               DynamicJPart part = parseJObject(jO);
                DynamicJText add = parseJArray(jO);
                if(part != null) {
                   text.add(part);
@@ -611,7 +611,7 @@ public class DynamicJText implements IJsonSerializable {
                text.add(add);
                ret.add(text);
             } else {
-               DynamicJPart fromJ = parseJObect(jO);
+               DynamicJPart fromJ = parseJObject(jO);
                if(fromJ != null) ret.add(fromJ);
             }
          }
@@ -619,7 +619,7 @@ public class DynamicJText implements IJsonSerializable {
       return ret;
    }
 
-   private static DynamicJPart parseJObect(JsonObject jObject) {
+   private static DynamicJPart parseJObject(JsonObject jObject) {
       if(!jObject.has("text")) return null;
       DynamicJPart part = new DynamicJPart(jObject.get("text").getAsString());
       if(jObject.has("color"))
@@ -633,12 +633,12 @@ public class DynamicJText implements IJsonSerializable {
             if(get != null)
                if(get instanceof JsonArray)
                   for(JsonElement jsonElement : get.getAsJsonArray()) {
-                     DynamicJPart jp = parseJObect(jsonElement.getAsJsonObject());
+                     DynamicJPart jp = parseJObject(jsonElement.getAsJsonObject());
                      if(jp != null) val += jp.getColor() +
                         jp.getStyles().stream().map(s -> s.getAsColor().toString()).collect(Collectors.joining()) + jp.getText() + "\n";
                   }
                else if(get instanceof JsonObject) {
-                  DynamicJPart jp = parseJObect(get.getAsJsonObject());
+                  DynamicJPart jp = parseJObject(get.getAsJsonObject());
                   if(jp != null) val += (jp.getColor() == null ? "" : jp.getColor()) +
                      jp.getStyles().stream().map(s -> s.getAsColor().toString()).collect(Collectors.joining()) + jp.getText() + "\n";
                }else val = get.getAsString();
