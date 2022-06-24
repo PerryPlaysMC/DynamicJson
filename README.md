@@ -15,10 +15,10 @@ public class DynamicJsonTest {
   public static void sendHelp(Player player) {
     DynamicJText text = new DynamicJText("&7------Help------");
     text.add("\n/jsontest help")
-          .onHover("Shows this help message")
+          .hover("Shows this help message")
           .command("/jsontest help")
     .add("\n/jsontest gradient")
-          .onHover("Show an example",
+          .hover("Show an example",
                    CColor.translateGradient("Of a gradient", CColor.AQUA, CColor.DARK_BLUE))
           .command("/jsontest gradient")
     .add("\n/jsontest parser")
@@ -41,25 +41,24 @@ public class DynamicJsonTest {
   public static void sendGradientTest(Player player) {
     {
       DynamicJText text = new DynamicJText();
-      text.gradient(CColor.AQUA, CCoLOR.DARK_BLUE)
+      text.add(IComponent.gradientComponent(CColor.AQUA, CColor.DARK_BLUE))
             .add("This is a gradient example")
-              .onHover("This is the start of the gradient")
+              .hover("This is the start of the gradient")
             .addDefault(" &fGradient break ")
             .add("Continue the gradient!")
-              .onHover("This is a continuation of the gradient");
+              .hover("This is a continuation of the gradient");
       text.send(player); 
     }
     {
       DynamicJText text = new DynamicJText();
-      text.gradient(CColor.AQUA, CCoLOR.DARK_BLUE)
+      text.add(IComponent.gradientComponent(CColor.AQUA, CColor.DARK_BLUE))
             .add("This is another gradient example")
-              .onHover("This is the start of the gradient")
+              .hover("This is the start of the gradient")
             .addDefault(" &fGradient break ")
             .add("Continue the gradient!")
-              .onHover("This is a continuation of the gradient")
-            .finish()
-          .add(" Broke out of the gradient buider :D")
-            .onHover("yay!");
+              .hover("This is a continuation of the gradient")
+          ).add(" Broke out of the gradient buider :D")
+            .hover("yay!");
       text.send(player); 
     }
   }
@@ -110,7 +109,7 @@ public class DynamicJsonTest {
 <dependency>
  <groupId>com.github.PerryPlaysMC</groupId>
  <artifactId>DynamicJson</artifactId>
- <version>v1.3.0</version>
+ <version>v2.0.0</version>
 </dependency>
 ```
 [![](https://jitpack.io/v/PerryPlaysMC/DynamicJson.svg)](https://jitpack.io/#PerryPlaysMC/DynamicJson)
@@ -179,7 +178,7 @@ And this is DynamicJson:
 ```
 Code used ^:
 ```java
-new DynamicJText().gradient("This is a long test message", CColor.AQUA, CColor.GREEN).finish().send(<player>);
+new DynamicJText(IComponent.gradientComponent("This is a long test message", CColor.AQUA, CColor.GREEN)).send(<player>);
 ```
 <img width="280" alt="Screen_Shot_2022-01-25_at_3 06 16_PM" src="https://user-images.githubusercontent.com/25993701/151052660-63d8b801-d8f9-4fb0-a8be-b1d003f6a619.png">
 
