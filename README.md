@@ -15,10 +15,10 @@ public class DynamicJsonTest {
   public static void sendHelp(Player player) {
     DynamicJText text = new DynamicJText("&7------Help------");
     text.add("\n/jsontest help")
-          .onHover("Shows this help message")
+          .hover("Shows this help message")
           .command("/jsontest help")
     .add("\n/jsontest gradient")
-          .onHover("Show an example",
+          .hover("Show an example",
                    CColor.translateGradient("Of a gradient", CColor.AQUA, CColor.DARK_BLUE))
           .command("/jsontest gradient")
     .add("\n/jsontest parser")
@@ -41,24 +41,23 @@ public class DynamicJsonTest {
   public static void sendGradientTest(Player player) {
     {
       DynamicJText text = new DynamicJText();
-      text.gradient(CColor.AQUA, CCoLOR.DARK_BLUE)
+      text.add(IComponent.gradientComponent(CColor.AQUA, CColor.DARK_BLUE))
             .add("This is a gradient example")
-              .onHover("This is the start of the gradient")
+              .hover("This is the start of the gradient")
             .addDefault(" &fGradient break ")
             .add("Continue the gradient!")
-              .onHover("This is a continuation of the gradient");
+              .hover("This is a continuation of the gradient");
       text.send(player); 
     }
     {
       DynamicJText text = new DynamicJText();
-      text.gradient(CColor.AQUA, CCoLOR.DARK_BLUE)
+      text.add(IComponent.gradientComponent(CColor.AQUA, CColor.DARK_BLUE))
             .add("This is another gradient example")
-              .onHover("This is the start of the gradient")
+              .hover("This is the start of the gradient")
             .addDefault(" &fGradient break ")
             .add("Continue the gradient!")
-              .onHover("This is a continuation of the gradient")
-            .finish()
-          .add(" Broke out of the gradient buider :D")
+              .hover("This is a continuation of the gradient")
+          ).add(" Broke out of the gradient buider :D")
             .onHover("yay!");
       text.send(player); 
     }
