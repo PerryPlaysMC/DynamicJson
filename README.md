@@ -58,7 +58,7 @@ public class DynamicJsonTest {
             .add("Continue the gradient!")
               .hover("This is a continuation of the gradient")
           ).add(" Broke out of the gradient buider :D")
-            .onHover("yay!");
+            .hover("yay!");
       text.send(player); 
     }
   }
