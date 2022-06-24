@@ -21,9 +21,11 @@ public class DynamicTextComponent extends DynamicComponent {
   private static final Pattern GENERATOR_PATTERN = Pattern.compile(generatorRegex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
   private String text = "";
 
-  protected DynamicTextComponent(String... text) {
-    if(text != null && text.length > 0) keyValue(String.join("\n", text));
+  protected DynamicTextComponent(String text) {
+    if(text != null) keyValue(String.join("\n", text));
   }
+
+  protected DynamicTextComponent() {}
 
   public DynamicTextComponent addDefault(String... children) {
     return add(IComponent.textComponent("§f" + String.join("\n", children)));
@@ -49,7 +51,7 @@ public class DynamicTextComponent extends DynamicComponent {
 
   @Override
   public String keyValue() {
-    return String.join("\n", text == null ? text = "" : text);
+    return (text == null ? text = "" : text);
   }
 
   @Override
