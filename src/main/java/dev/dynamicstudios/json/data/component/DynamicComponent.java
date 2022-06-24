@@ -65,12 +65,13 @@ public abstract class DynamicComponent implements IComponent {
   private IComponent parent = EMPTY_COMPONENT;
   private boolean isClone = false;
   private CColor color = CColor.NONE, nextColor = CColor.NONE;
-  private boolean dirty = false, gradient = false;
+  private boolean dirty = false, gradient = false, reset = false;
   private String hover = "";
   private DynamicHoverAction hoverAction = DynamicHoverAction.NONE;
   private String click = "";
   private DynamicClickAction clickAction = DynamicClickAction.NONE;
   private String insertion = "", font = "";
+
 
   @Override
   public IComponent clone() {
@@ -101,6 +102,10 @@ public abstract class DynamicComponent implements IComponent {
 
   public DynamicComponent color(CColor color) {
     this.color = color == null || color == CColor.RESET ? CColor.NONE : color;
+    if(color == CColor.RESET || color == null) {
+      styles.clear();
+      reset = true;
+    }
     children.forEach(c -> c.color(color));
     return dirtify();
   }
@@ -201,8 +206,8 @@ public abstract class DynamicComponent implements IComponent {
 
   @Override
   public DynamicComponent addReset(String... children) {
-    if(edit().isEmpty()) applyToNext(edit().styles()).applyToNext(edit().color());
-    else if(lastChild() != null && lastChild().isEmpty()) applyToNext(lastChild().styles()).applyToNext(lastChild().color());
+    if(!edit().isEmpty()) applyToNext(edit().styles()).applyToNext(edit().color());
+    else if(lastChild() != null && !lastChild().isEmpty()) applyToNext(lastChild().styles()).applyToNext(lastChild().color());
     addDefault(CColor.translateCommon(String.join("\n", children)));
     return dirtify();
   }
@@ -388,6 +393,11 @@ public abstract class DynamicComponent implements IComponent {
   }
 
   @Override
+  public boolean reset() {
+    return reset;
+  }
+
+  @Override
   public boolean isSimilar(IComponent future, ExcludeCheck... excludes) {
     List<ExcludeCheck> exclude = Arrays.asList(excludes);
     List<Boolean> bool = new LinkedList<>();
@@ -396,7 +406,7 @@ public abstract class DynamicComponent implements IComponent {
     if(!exclude.contains(ExcludeCheck.HOVER_EVENT)) bool.add(hoverAction() == future.hoverAction() && hover().equals(future.hover()));
     if(!exclude.contains(ExcludeCheck.INSERTION))bool.add(insertion().equals(future.insertion()));
     if(!exclude.contains(ExcludeCheck.FONT))bool.add(font().equals(future.font()));
-    if(!exclude.contains(ExcludeCheck.STYLES))bool.add(!styles().isEmpty()&&future.styles().isEmpty() || (styles().isEmpty()&&future.styles().isEmpty()) || (!styles().isEmpty() &&
+    if(!exclude.contains(ExcludeCheck.STYLES))bool.add(!styles().isEmpty()&&future.styles().isEmpty() || (styles().isEmpty()&&future.styles().isEmpty()&&!future.reset()) || (!styles().isEmpty() &&
       styles.size() >= future.styles().size() &&
       styles().entrySet().stream().allMatch(e -> !future.styles().containsKey(e.getKey()) || future.styles().get(e.getKey()) == e.getValue())));
 
@@ -615,7 +625,7 @@ public abstract class DynamicComponent implements IComponent {
         if((current.color() == CColor.NONE && prev.color() != CColor.NONE) || (prev.color()!=CColor.NONE&&prev.color().compare(current.color())))
           current.color(prev.color());
         prev.styles().keySet().forEach(key -> current.styles().computeIfAbsent(key, current.styles()::get));
-        if(prev.isSimilar(current) || (current.lengthIgnoreWhitespace()==0&&current.children().isEmpty())) {
+        if(prev.isSimilar(current)&&!current.reset()) {
           prev.keyValue(prev.keyValue() + current.keyValue());
           ignore.add(current);
         }

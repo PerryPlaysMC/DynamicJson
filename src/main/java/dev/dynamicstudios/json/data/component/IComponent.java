@@ -187,6 +187,8 @@ public interface IComponent extends IJson, Cloneable {
 
   boolean canWriteJson();
 
+  boolean reset();
+
   boolean isEmpty();
 
   String asString();
