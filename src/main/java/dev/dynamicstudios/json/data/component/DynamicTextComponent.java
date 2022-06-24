@@ -17,7 +17,8 @@ import java.util.regex.Pattern;
  **/
 
 public class DynamicTextComponent extends DynamicComponent {
-  private static final String generatorRegex = "(?:((?:§[mnolkr])+)?(#[a-fA-F\\d]{6}|§[\\dabcdef])*((?:§[mnolkr])+)?)?((?:(?!#[a-fA-F\\d]{6}|§[\\dabcdefmnolkr]).)+)";
+  private static final String generatorRegex = "(?:((?:§[mnolkr])+)?(#[a-fA-F\\d]{6}|§[\\dabcdef])*((?:§[mnolkr])+)?)?((?:" +
+    "(?!#[a-fA-F\\d]{6}|§[\\dabcdefmnolkr]).)*)";
   private static final Pattern GENERATOR_PATTERN = Pattern.compile(generatorRegex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
   private String text = "";
 
