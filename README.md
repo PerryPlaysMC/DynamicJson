@@ -178,7 +178,7 @@ And this is DynamicJson:
 ```
 Code used ^:
 ```java
-new DynamicJText().gradient("This is a long test message", CColor.AQUA, CColor.GREEN).finish().send(<player>);
+new DynamicJText(IComponent.gradientComponent("This is a long test message", CColor.AQUA, CColor.GREEN)).send(<player>);
 ```
 <img width="280" alt="Screen_Shot_2022-01-25_at_3 06 16_PM" src="https://user-images.githubusercontent.com/25993701/151052660-63d8b801-d8f9-4fb0-a8be-b1d003f6a619.png">
 
