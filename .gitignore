@@ -1,0 +1,4 @@
+target/*
+DynamicJson.iml
+target
+.DS_Store
