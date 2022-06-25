@@ -105,9 +105,7 @@ public abstract class DynamicComponent implements IComponent {
     if(color == CColor.RESET || color == null) {
       styles.clear();
       reset = true;
-    }else {
-      reset = false;
-    }
+    }else reset = false;
     children.forEach(c -> c.color(color));
     return dirtify();
   }
