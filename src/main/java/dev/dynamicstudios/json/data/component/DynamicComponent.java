@@ -524,11 +524,9 @@ public abstract class DynamicComponent implements IComponent {
   private void writeData(JsonBuilder builder, IComponent component) {
     CColor color = color() == CColor.RESET ? CColor.NONE : color();
     CColor par = parent != null ? (parent.color() == CColor.RESET ? CColor.NONE : parent.color()) : CColor.NONE;
-    System.out.println(par.getName() + " " + color.getName());
-    if(color != CColor.NONE) {
+    if(color != CColor.NONE)
       if(parent == null || (!(par == CColor.NONE && color == CColor.WHITE)))
         builder.name("color").value(color.getName());
-    }
     IComponent parent;
     for(Map.Entry<DynamicStyle, Boolean> entry : component.styles().entrySet()) {
       boolean writeStyle = entry.getValue();
