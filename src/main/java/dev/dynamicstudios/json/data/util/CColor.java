@@ -71,8 +71,8 @@ public class CColor {
     this.name = name.toLowerCase().replace(" ","_");
     this.ordinal = ordinal;
     this.color = color;
-    int x = Math.max(red(), Math.max(green(), blue()));
-    this.grayScale = new Color(x,x,x);
+    int grayScaleVal = Math.max(red(), Math.max(green(), blue()));
+    this.grayScale = new Color(grayScaleVal,grayScaleVal,grayScaleVal);
     this.hue = hsl[0];
     this.saturation = hsl[1];
     this.brightness = hsl[2];
