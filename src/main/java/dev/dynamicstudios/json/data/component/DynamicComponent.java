@@ -105,6 +105,8 @@ public abstract class DynamicComponent implements IComponent {
     if(color == CColor.RESET || color == null) {
       styles.clear();
       reset = true;
+    }else {
+      reset = false;
     }
     children.forEach(c -> c.color(color));
     return dirtify();
@@ -369,21 +371,25 @@ public abstract class DynamicComponent implements IComponent {
 
   @Override
   public DynamicComponent enableStyles(DynamicStyle... styles) {
+    if(styles.length>0) reset=false;
     return (DynamicComponent) IComponent.super.enableStyles(styles);
   }
 
   @Override
   public DynamicComponent disableStyles(DynamicStyle... styles) {
+    if(styles.length>0) reset=false;
     return (DynamicComponent) IComponent.super.disableStyles(styles);
   }
 
   @Override
   public DynamicComponent enableStyles(Collection<DynamicStyle> styles) {
+    if(styles.size()>0) reset=false;
     return (DynamicComponent) IComponent.super.enableStyles(styles);
   }
 
   @Override
   public DynamicComponent disableStyles(Collection<DynamicStyle> styles) {
+    if(styles.size()>0) reset=false;
     return (DynamicComponent) IComponent.super.disableStyles(styles);
   }
 
@@ -516,8 +522,11 @@ public abstract class DynamicComponent implements IComponent {
   }
 
   private void writeData(JsonBuilder builder, IComponent component) {
-    if(color() != CColor.NONE) {
-      if(parent == null || (!(parent.color() == CColor.NONE && color() == CColor.WHITE)))
+    CColor color = color() == CColor.RESET ? CColor.NONE : color();
+    CColor par = parent != null ? (parent.color() == CColor.RESET ? CColor.NONE : parent.color()) : CColor.NONE;
+    System.out.println(par.getName() + " " + color.getName());
+    if(color != CColor.NONE) {
+      if(parent == null || (!(par == CColor.NONE && color == CColor.WHITE)))
         builder.name("color").value(color.getName());
     }
     IComponent parent;
@@ -570,6 +579,10 @@ public abstract class DynamicComponent implements IComponent {
       if(toString.charAt(toString.length() - 1) != '{') toString.append(", ");
       toString.append("gradient=").append(isGradient());
     }
+    if(reset) {
+      if(toString.charAt(toString.length() - 1) != '{') toString.append(", ");
+      toString.append("reset=").append(reset());
+    }
     if(!children.isEmpty()) {
       if(toString.charAt(toString.length() - 1) != '{') toString.append(", ");
       toString.append("children=").append(children);
@@ -608,7 +621,10 @@ public abstract class DynamicComponent implements IComponent {
     if(children.size() == 1 && children.get(0).children().size() == 0 && keyType().equals("text")) {
       IComponent ch = children.get(0);
       if(color() == CColor.NONE || color() != ch.color()) color(ch.color());
-      if(styles().isEmpty() && !ch.styles().isEmpty()) styles.putAll(ch.styles());
+      if(styles().isEmpty() && !ch.styles().isEmpty()) {
+        styles.putAll(ch.styles());
+        reset = false;
+      }
     }
   }
 
@@ -618,18 +634,20 @@ public abstract class DynamicComponent implements IComponent {
     DynamicComponent parent = null;
     IComponent prev = null;
     IComponent prevParent = null;
+
     for(IComponent current : components) {
       if(!ignore.contains(current))newComponents.add(current);
       if(current instanceof DynamicComponent)((DynamicComponent)current).parent = this;
       if(prev!=null&&current.isGradient() == prev.isGradient()&&current.getClass().equals(prev.getClass())) {
-        if((current.color() == CColor.NONE && prev.color() != CColor.NONE) || (prev.color()!=CColor.NONE&&prev.color().compare(current.color())))
+        if(!current.reset()&&((current.color() == CColor.NONE && prev.color() != CColor.NONE) || (prev.color()!=CColor.NONE&&prev.color().compare(current.color()))))
           current.color(prev.color());
-        prev.styles().keySet().forEach(key -> current.styles().computeIfAbsent(key, current.styles()::get));
-        if(prev.isSimilar(current)&&!current.reset()) {
+        IComponent finalPrev = prev;
+        if(!current.reset())
+          prev.styles().keySet().forEach(key -> current.styles().computeIfAbsent(key, finalPrev.styles()::get));
+        if(prev.isSimilar(current) && !current.reset()) {
           prev.keyValue(prev.keyValue() + current.keyValue());
           ignore.add(current);
-        }
-        if(prev.lengthIgnoreWhitespace()==0&&prev.length()>0) {
+        } else if(prev.lengthIgnoreWhitespace()==0&&prev.length()>0) {
           current.keyValue(prev.keyValue() + current.keyValue());
           ignore.add(prev);
         }
@@ -657,7 +675,7 @@ public abstract class DynamicComponent implements IComponent {
         if(!ignore.contains(current)) componentList.add(current);
         continue;
       }
-      if(ignore.contains(current))continue;
+      if(ignore.contains(current)) continue;
       componentList.add(current);
       if(parent != null &&current.isGradient() == parent.isGradient()&& parent.isSimilar(current, ExcludeCheck.COLOR)) {
         parent.removeDuplicates(current);
@@ -669,10 +687,6 @@ public abstract class DynamicComponent implements IComponent {
         if(parent != null){
           parent.clean();
           if(prevParent!=null && parent.isSimilar(prevParent)&&parent.isGradient()==prevParent.isGradient()) {
-//            for(Map.Entry<DynamicStyle, Boolean> style : prevParent.styles().entrySet()) {
-//              if(!parent.styles().containsKey(style.getKey()))continue;
-//              if(parent.styles().get(style.getKey())==style.getValue()) parent.styles().remove(style.getKey());
-//            }
             parent.parent = prevParent;
             prevParent.children().add(parent);
           }
@@ -682,10 +696,11 @@ public abstract class DynamicComponent implements IComponent {
         parent = null;
       }
       if(!current.children().isEmpty()&&!current.hasData(ExcludeCheck.CHILDREN))continue;
-      if(current.isGradient() == future.isGradient())
-        if(current.children().isEmpty()&&current.isSimilar(future, ExcludeCheck.COLOR)&&current.hasData(ExcludeCheck.TEXT)) {
+      if(current.isGradient() == future.isGradient()&&current.reset()==future.reset())
+        if(current.children().isEmpty()&&current.isSimilar(future, current.isGradient() ? new ExcludeCheck[]{ExcludeCheck.COLOR} :
+          new ExcludeCheck[0])&&current.hasData(ExcludeCheck.TEXT)) {
           parent = new DynamicTextComponent();
-          parent.gradient(true);
+          parent.gradient(current.isGradient());
           current.applyData(parent);
           current.gradient(false);
           parent.removeDuplicates(current);
@@ -705,7 +720,6 @@ public abstract class DynamicComponent implements IComponent {
   }
 
   private void setParents(IComponent component) {
-    if(component.children().isEmpty())return;
     for(IComponent child : component.children()) {
       if(child instanceof DynamicComponent) ((DynamicComponent)child).parent = component;
       setParents(child);
