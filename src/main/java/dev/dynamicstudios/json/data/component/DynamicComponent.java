@@ -5,7 +5,6 @@ import dev.dynamicstudios.json.data.util.CColor;
 import dev.dynamicstudios.json.data.util.DynamicClickAction;
 import dev.dynamicstudios.json.data.util.DynamicHoverAction;
 import dev.dynamicstudios.json.data.util.DynamicStyle;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
@@ -410,8 +409,9 @@ public abstract class DynamicComponent implements IComponent {
     if(!exclude.contains(ExcludeCheck.HOVER_EVENT)) bool.add(hoverAction() == future.hoverAction() && hover().equals(future.hover()));
     if(!exclude.contains(ExcludeCheck.INSERTION))bool.add(insertion().equals(future.insertion()));
     if(!exclude.contains(ExcludeCheck.FONT))bool.add(font().equals(future.font()));
-    if(!exclude.contains(ExcludeCheck.STYLES))bool.add(!styles().isEmpty()&&future.styles().isEmpty() || (styles().isEmpty()&&future.styles().isEmpty()&&!future.reset()) || (!styles().isEmpty() &&
-      styles.size() >= future.styles().size() &&
+    if(!exclude.contains(ExcludeCheck.STYLES))bool.add((!exclude.contains(ExcludeCheck.HAS_EMPTY_STYLES) && !styles().isEmpty()&&future.styles().isEmpty()) ||
+      (styles().isEmpty()&&future.styles().isEmpty()&&!future.reset()) || (!future.reset()&&!styles().isEmpty() &&
+      styles().size() >= future.styles().size() &&
       styles().entrySet().stream().allMatch(e -> !future.styles().containsKey(e.getKey()) || future.styles().get(e.getKey()) == e.getValue())));
 
     return bool.stream().allMatch(Boolean::booleanValue);
@@ -625,12 +625,11 @@ public abstract class DynamicComponent implements IComponent {
   }
 
   private void compare(List<IComponent> components) {
-    Set<IComponent> ignore = new HashSet<>();
+    List<IComponent> ignore = new ArrayList<>();
     List<IComponent> newComponents = new ArrayList<>();
     DynamicComponent parent = null;
     IComponent prev = null;
     IComponent prevParent = null;
-
     for(IComponent current : components) {
       if(!ignore.contains(current))newComponents.add(current);
       if(current instanceof DynamicComponent)((DynamicComponent)current).parent = this;
@@ -654,60 +653,76 @@ public abstract class DynamicComponent implements IComponent {
     ignore.clear();
     List<IComponent> componentList = new ArrayList<>();
     for(int i = 0; i < newComponents.size(); i++) {
+      prev = i-1 >= 0 ? newComponents.get(i-1) : null;
       IComponent current = newComponents.get(i);
       IComponent future = i + 1 < newComponents.size() ? newComponents.get(i + 1) : null;
+      ExcludeCheck[] checks = current.isGradient() ? new ExcludeCheck[]{ExcludeCheck.COLOR, ExcludeCheck.HAS_EMPTY_STYLES} : new ExcludeCheck[]{ExcludeCheck.HAS_EMPTY_STYLES};
       if(future == null) {
         if(parent!=null){
-          if(parent.isSimilar(current, ExcludeCheck.COLOR)&&current.isGradient() == parent.isGradient()){
+          if(parent.isSimilar(current, checks)&&current.isGradient() == parent.isGradient()){
             parent.removeDuplicates(current);
             parent.children().add(current);
-            if(current instanceof DynamicComponent)((DynamicComponent)current).parent = parent;
             parent.clean();
             ignore.add(current);
           }
-          if(prevParent!=null && parent.isSimilar(prevParent)&&parent.isGradient()==prevParent.isGradient()) prevParent.children().add(parent);
-          else componentList.add(parent);
+          if(prevParent!=null && parent.isGradient()==prevParent.isGradient() && parent.isSimilar(prevParent,
+            parent.isGradient() ? new ExcludeCheck[]{ExcludeCheck.COLOR} : new ExcludeCheck[0])){
+            prevParent.children().add(parent);
+            componentList.add(prevParent);
+          } else{
+            if(prevParent!=null&&!componentList.contains(prevParent))componentList.add(prevParent);
+            componentList.add(parent);
+          }
+          if(parent.children().size() == 1) {
+            parent.applyIfNotPresentData(current);
+            componentList.remove(parent);
+            componentList.add(current);
+            continue;
+          }
         }
-        if(!ignore.contains(current)) componentList.add(current);
+        if(!componentList.contains(current)) componentList.add(current);
         continue;
       }
-      if(ignore.contains(current)) continue;
-      componentList.add(current);
-      if(parent != null &&current.isGradient() == parent.isGradient()&& parent.isSimilar(current, ExcludeCheck.COLOR)) {
+      if(componentList.contains(current)) continue;
+      if(parent != null &&current.isGradient() == parent.isGradient()&& parent.isSimilar(current, checks)) {
         parent.removeDuplicates(current);
         parent.children().add(current);
-        if(current instanceof DynamicComponent)((DynamicComponent)current).parent = parent;
-        ignore.add(current);
         continue;
       }else {
-        if(parent != null){
+        if(parent != null) {
           parent.clean();
-          if(prevParent!=null && parent.isSimilar(prevParent)&&parent.isGradient()==prevParent.isGradient()) {
-            parent.parent = prevParent;
+          if(prevParent != null && parent.isGradient() == prevParent.isGradient() && parent.isSimilar(prevParent,
+            parent.isGradient() ? new ExcludeCheck[]{ExcludeCheck.COLOR} : new ExcludeCheck[0])) {
             prevParent.children().add(parent);
-          }
-          else componentList.add(parent);
+            continue;
+          } else componentList.add(parent);
           prevParent = parent;
         }
+        if(parent!=null) {
+          if(parent.children().size() == 1) {
+            parent.applyIfNotPresentData(prev);
+            componentList.remove(parent);
+            componentList.add(prev);
+          }
+        }
+
         parent = null;
       }
+      componentList.add(current);
       if(!current.children().isEmpty()&&!current.hasData(ExcludeCheck.CHILDREN))continue;
       if(current.isGradient() == future.isGradient()&&current.reset()==future.reset())
-        if(current.children().isEmpty()&&current.isSimilar(future, current.isGradient() ? new ExcludeCheck[]{ExcludeCheck.COLOR} :
-          new ExcludeCheck[0])&&current.hasData(ExcludeCheck.TEXT)) {
+        if(current.children().isEmpty()&&future.children().isEmpty()&&current.isSimilar(future, checks)&&current.hasData(ExcludeCheck.TEXT)) {
           parent = new DynamicTextComponent();
           parent.gradient(current.isGradient());
           current.applyData(parent);
           current.gradient(false);
           parent.removeDuplicates(current);
           parent.children().add(current);
-          if(current instanceof DynamicComponent)((DynamicComponent)current).parent = parent;
-          ignore.add(current);
+          componentList.remove(current);
         }
     }
     for(IComponent iComponent : componentList) setParents(iComponent);
-    componentList.removeAll(ignore);
-    if(componentList.size() == 1&&!componentList.get(0).children().isEmpty()&&!ignore.isEmpty()&&!ignore.containsAll(components)) {
+    if(componentList.size() == 1&&!componentList.get(0).children().isEmpty()) {
       this.applyData(componentList.get(0));
       componentList.addAll(componentList.remove(0).children());
     }
@@ -721,6 +736,7 @@ public abstract class DynamicComponent implements IComponent {
       setParents(child);
     }
   }
+
 
   private void compareWith() {
     compare(with());
@@ -756,6 +772,21 @@ public abstract class DynamicComponent implements IComponent {
     applyTo.hover(hoverAction(),hover());
     applyTo.insertion(insertion());
     applyTo.font(font());
+  }
+  @Override
+  public void applyIfNotPresentData(IComponent applyTo) {
+    styles().forEach((k,v)->{
+      if(applyTo.styles().containsKey(k))return;
+      applyTo.styles().put(k,v);
+    });
+    if(applyTo.click().equals(""))
+      applyTo.click(clickAction(),click());
+    if(applyTo.hover().equals(""))
+      applyTo.hover(hoverAction(),hover());
+    if(applyTo.insertion().equals(""))
+      applyTo.insertion(insertion());
+    if(applyTo.font().equals(""))
+      applyTo.font(font());
   }
 
   @Override

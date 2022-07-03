@@ -257,8 +257,10 @@ public interface IComponent extends IJson, Cloneable {
     return DynamicScoreComponent.of(name, objective);
   }
 
+  void applyIfNotPresentData(IComponent applyTo);
+
   public enum ExcludeCheck {
-    COLOR, HOVER_EVENT, CLICK_EVENT, INSERTION, FONT, STYLES, TEXT, CHILDREN
+    COLOR, HOVER_EVENT, CLICK_EVENT, INSERTION, FONT, STYLES, HAS_EMPTY_STYLES, TEXT, CHILDREN
   }
 
 }
