@@ -23,7 +23,7 @@ public class DynamicTextComponent extends DynamicComponent {
   private String text = "";
 
   protected DynamicTextComponent(String text) {
-    if(text != null) keyValue(String.join("\n", text));
+    if(text != null) keyValue(text);
   }
 
   protected DynamicTextComponent() {}
@@ -86,7 +86,9 @@ public class DynamicTextComponent extends DynamicComponent {
     DynamicTextComponent part = new DynamicTextComponent();
     Set<DynamicStyle> styles = new HashSet<>(), disableForNext = new HashSet<>();
     CColor cColor = CColor.RESET;
+    CColor last;
     while(results.find()) {
+      last = cColor;
       String text = results.group(4) == null ? "" : results.group(4);
       if(!isEmpty(results.group(1)) || !isEmpty(results.group(2)) || !isEmpty(results.group(3))) {
         String color = (isEmpty(results.group(2)) ? "" : results.group(2));
@@ -106,7 +108,7 @@ public class DynamicTextComponent extends DynamicComponent {
         } catch (IllegalArgumentException ignored) {
         }
       }
-      if(text.equals("")) continue;
+      if(cColor == last && text.equals("")) continue;
       DynamicTextComponent p = new DynamicTextComponent(text);
       p.color(cColor).disableStyles(disableForNext).enableStyles(styles);
       part.add(p);

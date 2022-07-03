@@ -37,6 +37,8 @@ public interface IComponent extends IJson, Cloneable {
 
   boolean isGradient();
 
+  IComponent colorIn(CColor color);
+
   CColor color();
 
   IComponent color(CColor color);

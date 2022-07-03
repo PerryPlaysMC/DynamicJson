@@ -105,9 +105,21 @@ public abstract class DynamicComponent implements IComponent {
       styles.clear();
       reset = true;
     }else reset = false;
+    children.stream().filter(c->c.color()==CColor.NONE).forEach(c -> c.color(color));
+    return dirtify();
+  }
+
+  @Override
+  public DynamicComponent colorIn(CColor color) {
+    this.color = color == null || color == CColor.RESET ? CColor.NONE : color;
+    if(color == CColor.RESET || color == null) {
+      styles.clear();
+      reset = true;
+    }else reset = false;
     children.forEach(c -> c.color(color));
     return dirtify();
   }
+
 
   public CColor color() {
     return color;
@@ -523,7 +535,7 @@ public abstract class DynamicComponent implements IComponent {
     CColor color = color() == CColor.RESET ? CColor.NONE : color();
     CColor par = parent != null ? (parent.color() == CColor.RESET ? CColor.NONE : parent.color()) : CColor.NONE;
     if(color != CColor.NONE)
-      if(parent == null || (!(par == CColor.NONE && color == CColor.WHITE)))
+      if(parent == null || par != color)
         builder.name("color").value(color.getName());
     IComponent parent;
     for(Map.Entry<DynamicStyle, Boolean> entry : component.styles().entrySet()) {
@@ -637,8 +649,7 @@ public abstract class DynamicComponent implements IComponent {
         if(!current.reset()&&((current.color() == CColor.NONE && prev.color() != CColor.NONE) || (prev.color()!=CColor.NONE&&prev.color().compare(current.color()))))
           current.color(prev.color());
         IComponent finalPrev = prev;
-        if(!current.reset())
-          prev.styles().keySet().forEach(key -> current.styles().computeIfAbsent(key, finalPrev.styles()::get));
+        if(!current.reset()) prev.styles().keySet().forEach(key -> current.styles().computeIfAbsent(key, finalPrev.styles()::get));
         if(prev.isSimilar(current) && !current.reset()) {
           prev.keyValue(prev.keyValue() + current.keyValue());
           ignore.add(current);
