@@ -89,10 +89,15 @@ public enum Version {
 
 
   public static Class<?> findClass(String name) {
+    return findClass(name,false);
+  }
+
+  public static Class<?> findClass(String name, boolean stackTrace) {
     try {
       return Class.forName(name);
     } catch (Exception e) {
-      e.printStackTrace();
+      if(stackTrace)
+        e.printStackTrace();
       return null;
     }
   }
