@@ -65,7 +65,8 @@ public class PacketSendChat {
   }
 
 
-  private static final Class<?> asNMS = Version.Minecraft.getClass("network.protocol.game.PacketPlayOutChat");
+  private static final Class<?> asNMS = Version.Minecraft.getClass("network.protocol.game.PacketPlayOutChat") == null ?
+    Version.Minecraft.getClass("network.protocol.game.ClientboundSystemChatPacket") : Version.Minecraft.getClass("network.protocol.game.PacketPlayOutChat");
 
   public Class<?> getNMSClass() {
     return asNMS;
