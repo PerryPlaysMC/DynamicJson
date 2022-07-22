@@ -19,7 +19,13 @@ public enum Version {
   v1_16(1160), v1_16_R1(1161), v1_16_R2(1162), v1_16_R3(1163),
   v1_17(1170), v1_17_R1(1171),
   v1_18(1180), v1_18_R1(1181),
+  v1_19(1190), v1_19_R1(1191),
   UNKNOWN(Integer.MAX_VALUE, "Unknown");
+
+  static {
+    currentExact();
+    current();
+  }
 
   private static Version current, exact;
 
@@ -160,6 +166,10 @@ public enum Version {
     return current = ret;
   }
 
+  @Override
+  public String toString() {
+    return name()+"(versionId='" + ver + "', version='" + version + "')";
+  }
 
   public static Version value(String versionId) {
     for(Version version : values())
