@@ -147,16 +147,18 @@ public abstract class DynamicComponent implements IComponent {
     if(!exclude.contains(ExcludeCheck.HOVER_EVENT)) bool.add(!isNullOrEmpty(hover())&&!isNullOrEmpty(hoverAction()));
     if(!exclude.contains(ExcludeCheck.INSERTION))bool.add(!isNullOrEmpty(insertion()));
     if(!exclude.contains(ExcludeCheck.CHILDREN))bool.add(!isNullOrEmpty(with()));
-    if(!exclude.contains(ExcludeCheck.CHILDREN))bool.add(!isNullOrEmpty(edit()));
+    if(!exclude.contains(ExcludeCheck.CHILDREN))bool.add(!isNullOrEmpty(edit()) || !children().isEmpty());
     if(!exclude.contains(ExcludeCheck.STYLES))bool.add(!isNullOrEmpty(styles()));
     if(!exclude.contains(ExcludeCheck.COLOR))bool.add(!isNullOrEmpty(color()));
-
     return bool.stream().anyMatch(Boolean::booleanValue);
   }
 
 
   boolean isNullOrEmpty(Object o) {
-    return o == null || (o instanceof CColor ? o == CColor.NONE : (o instanceof List ? ((List<?>) o).isEmpty() : o.toString().isEmpty()));
+    if(o == null) return true;
+    if(o instanceof CColor) return o == CColor.NONE;
+    if(o instanceof Map) return ((Map<?,?>) o).isEmpty();
+    return (o instanceof Collection ? ((Collection<?>) o).isEmpty() : o.toString().isEmpty());
   }
 
   @Override
@@ -465,7 +467,14 @@ public abstract class DynamicComponent implements IComponent {
     if(length() == 0) return;
     if(keyType().equals("text") &&
       !(this instanceof IChildPriority) && children().size() == 1 && children().get(0).children().size() == 0 &&
-      children().get(0).keyType().equals("text")) keyValue(children().remove(0).keyValue());
+      children().get(0).keyType().equals("text")) {
+      IComponent child = children().remove(0);
+      if(!hasData(ExcludeCheck.TEXT, ExcludeCheck.CHILDREN)) {
+        child.writeJson(builder);
+        return;
+      }
+      keyValue(child.keyValue());
+    }
     boolean hasChildren = false;
     if(!children().isEmpty()) {
       if(dirty()) compareChildren();
@@ -483,7 +492,8 @@ public abstract class DynamicComponent implements IComponent {
       }
       hasChildren = children().stream().filter(IComponent::canWriteJson).anyMatch(c -> c.length() > 0);
       if(keyType().equals("text"))
-        if(children().size() == 1 && children().get(0).children().size() == 0 && !equalsIgnoreChildren(EMPTY_COMPONENT)&& keyType().equals(children().get(0).keyType())) {
+        if(children().size() == 1 && children().get(0).children().size() == 0
+          && !equalsIgnoreChildren(EMPTY_COMPONENT)&& keyType().equals(children().get(0).keyType())) {
           keyValue(children().remove(0).keyValue());
         } else if(equalsIgnoreChildren(EMPTY_COMPONENT)) {
           children().remove(0).writeJson(builder);
@@ -532,10 +542,11 @@ public abstract class DynamicComponent implements IComponent {
   }
 
   private void writeData(JsonBuilder builder, IComponent component) {
-    CColor color = color() == CColor.RESET ? CColor.NONE : color();
-    CColor par = parent != null ? (parent.color() == CColor.RESET ? CColor.NONE : parent.color()) : CColor.NONE;
+    CColor color = component.color() == CColor.RESET ? CColor.NONE : component.color();
+    CColor par = component.parent() != null ?
+      (component.parent().color() == CColor.RESET ? CColor.NONE : component.parent().color()) : CColor.NONE;
     if(color != CColor.NONE)
-      if(parent == null || par != color)
+      if(component.parent() == null || par != color)
         builder.name("color").value(color.getName());
     IComponent parent;
     for(Map.Entry<DynamicStyle, Boolean> entry : component.styles().entrySet()) {
