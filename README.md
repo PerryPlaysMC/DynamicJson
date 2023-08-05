@@ -109,7 +109,7 @@ public class DynamicJsonTest {
 <dependency>
  <groupId>com.github.PerryPlaysMC</groupId>
  <artifactId>DynamicJson</artifactId>
- <version>v2.0.2</version>
+ <version>2.0.4</version>
 </dependency>
 ```
 [![](https://jitpack.io/v/PerryPlaysMC/DynamicJson.svg)](https://jitpack.io/#PerryPlaysMC/DynamicJson)
