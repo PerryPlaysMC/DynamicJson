@@ -159,14 +159,14 @@ public enum Version {
   }
 
   public static Version current() {
-    if(current != null) return current;
+    if(current != null && (current != UNKNOWN || (current.ver != Integer.MAX_VALUE&&current.version.equalsIgnoreCase("Unknown")))) return current;
     String pack = Bukkit.getServer().getClass().getPackage().getName();
     String version = pack.substring(pack.lastIndexOf('.') + 1);
     Version ret = value(version.split("_R")[0]);
     if(ret == null) {
       ret = Version.UNKNOWN;
       ret.version = version.startsWith("v") ? version : "v" + version;
-      ret.ver = Integer.parseInt(version.toLowerCase().split(("r"))[0].replace(("_"), ("")).replace("v", ""));
+      ret.ver = Integer.parseInt(version.toLowerCase().split(("r"))[0].replace(("_"), ("")).replace("v", "") + "0");
     }
     return current = ret;
   }

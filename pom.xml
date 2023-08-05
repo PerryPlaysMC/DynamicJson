@@ -4,9 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>dev.dynamicstudios.dynamicjson</groupId>
+    <groupId>dev.dynamicstudios.json</groupId>
     <artifactId>DynamicJson</artifactId>
-    <version>v2.0.3</version>
+    <packaging>jar</packaging>
+    <version>2.0.4</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -29,7 +30,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.68.Final</version>
+            <version>4.1.86.Final</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
