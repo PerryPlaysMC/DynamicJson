@@ -77,7 +77,7 @@ public class CColor {
     this.saturation = hsl[1];
     this.brightness = hsl[2];
     lab = rgbToLab(color);
-    BY_NAME.put(name.replace(" ","_").toLowerCase(Locale.ROOT), this);
+    BY_NAME.put(name.replace(" ","_").toUpperCase(Locale.ROOT), this);
   }
 
   private CColor(char code, String name) {
@@ -440,6 +440,8 @@ public class CColor {
   public static CColor fromName(String name) {
     Preconditions.checkNotNull(name, "Name is null");
     CColor defined = BY_NAME.get(name.toUpperCase());
+    if(defined == null)
+      defined = BY_NAME.get(name.toLowerCase());
     Preconditions.checkArgument(defined != null, "No enum constant " + CColor.class.getName() + "." + name);
     return defined;
   }
@@ -447,6 +449,7 @@ public class CColor {
   public static CColor fromTranslated(String name) {
     Preconditions.checkNotNull(name, "Name is null");
     if(BY_NAME.containsKey(name.toUpperCase())) return BY_NAME.get(name.toUpperCase());
+    if(BY_NAME.containsKey(name.toLowerCase())) return BY_NAME.get(name.toLowerCase());
     if(name.length() >= 6) {
       return fromHex(resetHex(name));
     }
