@@ -12,6 +12,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Creator: PerryPlaysMC
@@ -31,7 +32,6 @@ public class JsonSender {
   private static final Method getHandle = ReflectionUtils.getMethod(craftPlayer, "getHandle");
   private static final Field playerConnection = ReflectionUtils.getField(entityPlayer, playerConnect);
   private static final Field networkManager = ReflectionUtils.getField(playerConnect, networkMan);
-
 
   public static void sendJson(String json, Player... players) {
     sendJson(new PacketSendChat(json, PacketSendChat.ChatMessageType.DEFAULT_CHAT), players);

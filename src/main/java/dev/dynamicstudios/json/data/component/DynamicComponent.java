@@ -242,7 +242,7 @@ public abstract class DynamicComponent implements IComponent {
 
   @Override
   public IComponent childAt(int index) {
-    if(children.size() == 0) return null;
+    if(children.isEmpty()) return null;
     return index > children.size() ? children.get(children.size() - 1) : index < 0 ? children.get(0) : children.get(index);
   }
 
@@ -394,13 +394,13 @@ public abstract class DynamicComponent implements IComponent {
 
   @Override
   public DynamicComponent enableStyles(Collection<DynamicStyle> styles) {
-    if(styles.size()>0) reset=false;
+    if(!styles.isEmpty()) reset=false;
     return (DynamicComponent) IComponent.super.enableStyles(styles);
   }
 
   @Override
   public DynamicComponent disableStyles(Collection<DynamicStyle> styles) {
-    if(styles.size()>0) reset=false;
+    if(!styles.isEmpty()) reset=false;
     return (DynamicComponent) IComponent.super.disableStyles(styles);
   }
 
@@ -468,7 +468,7 @@ public abstract class DynamicComponent implements IComponent {
     if(keyType().equals("text") &&
       !(this instanceof IChildPriority) && children().size() == 1 && children().get(0).children().size() == 0 &&
       children().get(0).keyType().equals("text")) {
-      IComponent child = children().remove(0);
+      IComponent child = children().get(0);
       if(!hasData(ExcludeCheck.TEXT, ExcludeCheck.CHILDREN)) {
         child.writeJson(builder);
         return;
@@ -480,10 +480,35 @@ public abstract class DynamicComponent implements IComponent {
       if(dirty()) compareChildren();
       if(equalsIgnoreChildren(EMPTY_COMPONENT) || isEmpty() || (!hasData() && styles().isEmpty() && keyValue().isEmpty())) {
         boolean newObject = builder.topObject() != JsonBuilder.ObjectType.ARRAY;
+				if(children().size() > 1) {
+					if(children().stream().filter(c -> !c.hasData(ExcludeCheck.TEXT)).count() == 1) {
+						if(!children().get(0).isEmpty()) {
+							IComponent initial = children().get(0);
+							List<IComponent> children = new ArrayList<>();
+							for(IComponent child : children()) {
+								if(child.equal(initial)) continue;
+								if(initial.keyType().equalsIgnoreCase(child.keyType()))
+									initial.keyValue(initial.keyValue() + child.keyValue());
+								else children.add(initial);
+							}
+							if(!children.contains(initial)) children.add(initial);
+							if(children.size() > 1) {
+								builder.beginObject().name("text").value("");
+								if(!isEmpty()) writeData(builder, this);
+
+								builder.name("extra").beginArray();
+							}
+							for(IComponent child : children) child.writeJson(builder);
+							if(children.size() > 1) builder.end().end();
+							clean();
+							return;
+						}
+					}
+				}
         if(children().size() > 1 && newObject) {
-          builder.beginObject().name("text").value("");
-          if(!isEmpty()) writeData(builder, this);
-          builder.name("extra").beginArray();
+	        builder.beginObject().name("text").value("");
+	        if(!isEmpty()) writeData(builder, this);
+	        builder.name("extra").beginArray();
         }
         for(IComponent child : children()) child.writeJson(builder);
         if(children().size() > 1 && newObject) builder.end().end();
@@ -517,7 +542,7 @@ public abstract class DynamicComponent implements IComponent {
     }
     if(!with().isEmpty()) {
       if(dirty()) compareWith();
-      boolean hasWith = with().stream().filter(IComponent::canWriteJson).anyMatch(c -> c.length() > 0);
+      boolean hasWith = with().stream().filter(IComponent::canWriteJson).anyMatch(c -> !c.isEmpty());
       if(hasWith) {
         builder.name("with").beginArray();
         for(IComponent with : with()) with.writeJson(builder);

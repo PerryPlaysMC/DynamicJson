@@ -270,10 +270,11 @@ public class DynamicJText extends DynamicTextComponent {
   @Override
   public String toString() {
     if(dirty()||json==null||json.isEmpty()) {
-      StringBuilder stringWriter = new StringBuilder();
-      JsonBuilder writer = new JsonBuilder(stringWriter);
-      writeJson(writer);
-      json = stringWriter.toString();
+	    StringBuilder stringWriter = new StringBuilder();
+	    JsonBuilder writer = new JsonBuilder(stringWriter);
+	    writeJson(writer);
+	    json = stringWriter.toString();
+	    clean();
     }
     return json;
   }

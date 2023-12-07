@@ -31,6 +31,11 @@ public class PacketSendChat {
   }
 
   public void write(PacketDataSerializer data) {
+	  if(Version.isCurrentOrHigher(Version.v1_20)) {
+			data.writeString(json);
+			data.writeBoolean(type == ChatMessageType.ACTION_BAR);
+			return;
+	  }
     data.writeString(json);
     data.writeByte(type.getIndex());
     if(Version.isCurrentHigher(Version.v1_15)) data.writeUUID(id);

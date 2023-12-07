@@ -84,7 +84,7 @@ public class DynamicTextComponent extends DynamicComponent {
     Matcher results = GENERATOR_PATTERN.matcher(CColor.resetHex(generateFrom));
     DynamicTextComponent part = new DynamicTextComponent();
     Set<DynamicStyle> styles = new HashSet<>(), disableForNext = new HashSet<>();
-    CColor cColor = CColor.RESET;
+    CColor cColor = CColor.NONE;
     CColor last;
     while(results.find()) {
       last = cColor;
@@ -93,7 +93,7 @@ public class DynamicTextComponent extends DynamicComponent {
         String color = (isEmpty(results.group(2)) ? "" : results.group(2));
         String s1 = isEmpty(results.group(1)) ? "" : results.group(1);
         String s2 = isEmpty(results.group(3)) ? "" : results.group(3);
-        if(s2.endsWith(CColor.RESET.toString())) {
+        if(s2.endsWith(CColor.RESET.toString()) || (s2.isEmpty() && s1.endsWith(CColor.RESET.toString()))) {
           cColor = CColor.WHITE;
           disableForNext.addAll(styles);
           styles.clear();
@@ -109,7 +109,8 @@ public class DynamicTextComponent extends DynamicComponent {
       }
       if(cColor == last && text.equals("")) continue;
       DynamicTextComponent p = new DynamicTextComponent(text);
-      p.color(cColor).disableStyles(disableForNext).enableStyles(styles);
+      if(cColor!=CColor.NONE)p.color(cColor);
+			p.disableStyles(disableForNext).enableStyles(styles);
       part.add(p);
     }
     part.complete();

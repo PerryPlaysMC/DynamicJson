@@ -20,6 +20,7 @@ public enum Version {
   v1_17(1170), v1_17_R1(1171),
   v1_18(1180), v1_18_R1(1181),
   v1_19(1190), v1_19_R1(1191),
+	v1_20(1120), v1_20_R1(11201), v1_20_R2(11202),
   UNKNOWN(Integer.MAX_VALUE, "Unknown");
 
   static {
@@ -74,8 +75,8 @@ public enum Version {
 
   public static boolean isCurrentOrHigher(Version v) {
     if(v.name().contains("R"))
-      return currentExact().isHigher(v);
-    return current().isHigher(v);
+      return currentExact().isOrHigher(v);
+    return current().isOrHigher(v);
   }
 
   public static String getNMSPackage() {

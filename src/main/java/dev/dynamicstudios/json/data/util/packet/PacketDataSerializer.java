@@ -32,6 +32,15 @@ public class PacketDataSerializer {
     return this.data.writeBytes(abyte);
   }
 
+	public boolean writeBoolean() {
+		return this.data.readBoolean();
+	}
+
+	public PacketDataSerializer writeBoolean(boolean data) {
+		this.data.writeBoolean(data);
+		return this;
+	}
+
   public PacketDataSerializer write(int i) {
     while((i & -128) != 0) {
       this.writeByte(i & 127 | 128);
