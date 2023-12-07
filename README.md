@@ -22,11 +22,11 @@ public class DynamicJsonTest {
                    CColor.translateGradient("Of a gradient", CColor.AQUA, CColor.DARK_BLUE))
           .command("/jsontest gradient")
     .add("\n/jsontest parser")
-          .onHover("Show an example",
+          .hover("Show an example",
                    "<gradient=\"red,blue\">Of the DynamicJson parser</gradient>")
           .command("/jsontest parser")
     .add("\n/jsontest parsejson")
-          .onHover("Show an example",
+          .hover("Show an example",
                    "{\"text\":\"Of json parser\"}")
           .command("/jsontest parsejson");
     text.send(player); 
@@ -109,7 +109,7 @@ public class DynamicJsonTest {
 <dependency>
  <groupId>com.github.PerryPlaysMC</groupId>
  <artifactId>DynamicJson</artifactId>
- <version>2.0.6</version>
+ <version>2.0.7</version>
 </dependency>
 ```
 [![](https://jitpack.io/v/PerryPlaysMC/DynamicJson.svg)](https://jitpack.io/#PerryPlaysMC/DynamicJson)
