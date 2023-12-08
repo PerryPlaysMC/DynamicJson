@@ -47,9 +47,14 @@ public class ReflectionUtils {
     }
     Set<Field> fields = new HashSet<>();
     Collections.addAll(fields, clazz.getFields());
-    Collections.addAll(fields, clazz.getDeclaredFields());
+	  Collections.addAll(fields, clazz.getDeclaredFields());
+		if(clazz.getSuperclass() != null) {
+			Collections.addAll(fields, clazz.getSuperclass().getDeclaredFields());
+			Collections.addAll(fields, clazz.getSuperclass().getFields());
+		}
     for(Field field : fields) {
       if(field.getType().getName().equals(returnType.getName())) {
+				field.setAccessible(true);
         HashMap<CacheHolder, Field> map = FIELD_CACHE.getOrDefault(clazz, new HashMap<>());
         map.put(new CacheHolder(null, returnType, null, null), field);
         FIELD_CACHE.put(clazz, map);
