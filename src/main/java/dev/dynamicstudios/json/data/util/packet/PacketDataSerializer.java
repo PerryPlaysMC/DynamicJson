@@ -32,7 +32,7 @@ public class PacketDataSerializer {
     return this.data.writeBytes(abyte);
   }
 
-	public boolean writeBoolean() {
+	public boolean readBoolean() {
 		return this.data.readBoolean();
 	}
 
@@ -51,6 +51,7 @@ public class PacketDataSerializer {
   }
 
   public PacketDataSerializer writeString(String s) {
+
     return this.writeStringMax(s, 32767);
   }
 
@@ -59,6 +60,10 @@ public class PacketDataSerializer {
     this.writeLong(uuid.getLeastSignificantBits());
     return this;
   }
+
+	public UUID readUUID() {
+		return new UUID(readLong(), readLong());
+	}
 
   public PacketDataSerializer writeStringMax(String s, int i) {
     byte[] abyte = s.getBytes(StandardCharsets.UTF_8);
@@ -74,6 +79,13 @@ public class PacketDataSerializer {
   public void writeLong(Long value) {
     this.data.writeLong(value);
   }
+	public long readLong() {
+		return this.data.readLong();
+	}
+
+	public byte readByte() {
+		return data.readByte();
+	}
 
   public int readInt() {
     int i = 0;

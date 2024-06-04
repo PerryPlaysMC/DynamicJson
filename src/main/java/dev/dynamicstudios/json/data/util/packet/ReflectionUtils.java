@@ -13,9 +13,9 @@ public class ReflectionUtils {
   private static final HashMap<Class<?>, HashMap<CacheHolder, Constructor<?>>> CONSTRUCTOR_CACHE = new HashMap<>();
 
   public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... params) {
-    if(CONSTRUCTOR_CACHE.containsKey(clazz)) {
-      CacheHolder cache = new CacheHolder(null, clazz, params, null);
-      if(CONSTRUCTOR_CACHE.get(clazz).containsKey(cache)) return CONSTRUCTOR_CACHE.get(clazz).get(cache);
+	  CacheHolder key = new CacheHolder(null, clazz, params, null);
+	  if(CONSTRUCTOR_CACHE.containsKey(clazz)) {
+		  if(CONSTRUCTOR_CACHE.get(clazz).containsKey(key)) return CONSTRUCTOR_CACHE.get(clazz).get(key);
     }
     Set<Constructor<?>> methods = new HashSet<>();
     Collections.addAll(methods, clazz.getConstructors());
@@ -24,15 +24,20 @@ public class ReflectionUtils {
       if(constructor.getParameterCount() == params.length) {
         boolean match = true;
         for(int i = 0; i < constructor.getParameterTypes().length; i++)
-          if(!constructor.getParameterTypes()[i].getName().equals(params[i].getName())) {
+          if(params[i] == null || !constructor.getParameterTypes()[i].getName().equals(params[i].getName())) {
             match = false;
             break;
           }
-        if(match) {
-          HashMap<CacheHolder, Constructor<?>> map = CONSTRUCTOR_CACHE.getOrDefault(clazz, new HashMap<>());
-          map.put(new CacheHolder(null, clazz, params, null), constructor);
+	      HashMap<CacheHolder, Constructor<?>> map = CONSTRUCTOR_CACHE.getOrDefault(clazz, new HashMap<>());
+	      if(match) {
+		      map.put(key, constructor);
           CONSTRUCTOR_CACHE.put(clazz, map);
           return constructor;
+        }else {
+					if(!map.containsKey(key)) {
+						map.put(key, null);
+						CONSTRUCTOR_CACHE.put(clazz, map);
+					}
         }
       }
     }

@@ -2,6 +2,7 @@ package dev.dynamicstudios.json;
 
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.defaults.VersionCommand;
 
 import java.util.HashMap;
 
@@ -20,7 +21,7 @@ public enum Version {
   v1_17(1170), v1_17_R1(1171),
   v1_18(1180), v1_18_R1(1181),
   v1_19(1190), v1_19_R1(1191),
-	v1_20(1120), v1_20_R1(11201), v1_20_R2(11202),
+	v1_20(1200), v1_20_R1(1201), v1_20_R2(1202), v1_20_R4(1204),
   UNKNOWN(Integer.MAX_VALUE, "Unknown");
 
   static {
@@ -85,7 +86,8 @@ public enum Version {
   }
 
   public static String getCBPackage() {
-    return "org.bukkit.craftbukkit." + currentExact().getVersion();
+	  String version = currentExact().getVersion();
+	  return "org.bukkit.craftbukkit" + (version.contains("R") ? "." + version : "") ;
   }
 
 
@@ -108,7 +110,10 @@ public enum Version {
 
     public static Class<?> getClass(String clazz) {
       if(CACHE.containsKey(clazz)) return CACHE.get(clazz);
-      Class<?> cls = Version.findClass(getCBPackage() + "." + clazz);
+      Class<?> cls = findClass(getCBPackage() + "." + clazz);
+			if(cls == null) {
+				cls = findClass(getCBPackage() + "." + clazz);
+			}
       CACHE.put(clazz, cls);
       return cls;
     }
@@ -121,11 +126,11 @@ public enum Version {
       if(CACHE.containsKey(clazz)) return CACHE.get(clazz);
       String nms = getNMSPackage();
       Class<?> cls = null;
-      if(!Version.isCurrentHigher(v1_16_R3))
+      if(!isCurrentHigher(v1_16_R3))
         if(clazz.contains("."))
-          cls = Version.findClass(nms + "." + clazz.split("\\.")[clazz.split("\\.").length - 1]);
+          cls = findClass(nms + "." + clazz.split("\\.")[clazz.split("\\.").length - 1]);
       if(cls == null)
-        cls = Version.findClass(nms + "." + clazz);
+        cls = findClass(nms + "." + clazz);
       if(cls != null)
         CACHE.put(clazz, cls);
       return cls;
@@ -153,8 +158,14 @@ public enum Version {
     Version ret = value(version);
     if(ret == null) {
       ret = Version.UNKNOWN;
-      ret.version = version.startsWith("v") ? version : "v" + version;
-      ret.ver = Integer.parseInt(version.toLowerCase().replace(("_"), ("")).replace(("r"), ("")).replace("v", ""));
+			try {
+				ret.version = version.startsWith("v") ? version : "v" + version;
+				ret.ver = Integer.parseInt(version.toLowerCase().replace(("_"), ("")).replace(("r"), ("")).replace("v", ""));
+			}catch (Exception e) {
+				version = Bukkit.getBukkitVersion().replaceAll("-.+","");
+				ret.version = (version.startsWith("v") ? version : "v" + version).replace(".","_");
+				ret.ver = Integer.parseInt(version.toLowerCase().replace(("."), ("")).replace(("r"), ("")).replace("v", ""));
+			}
     }
     return exact = ret;
   }
@@ -166,8 +177,14 @@ public enum Version {
     Version ret = value(version.split("_R")[0]);
     if(ret == null) {
       ret = Version.UNKNOWN;
-      ret.version = version.startsWith("v") ? version : "v" + version;
-      ret.ver = Integer.parseInt(version.toLowerCase().split(("r"))[0].replace(("_"), ("")).replace("v", "") + "0");
+	    try {
+		    ret.version = version.startsWith("v") ? version : "v" + version;
+		    ret.ver = Integer.parseInt(version.toLowerCase().split(("r"))[0].replace(("_"), ("")).replace("v", "") + "0");
+	    }catch (Exception e) {
+		    version = Bukkit.getBukkitVersion().replaceAll("-.+","");
+		    ret.version = (version.startsWith("v") ? version : "v" + version).replace(".","_");
+		    ret.ver = Integer.parseInt(version.toLowerCase().substring(0,version.toLowerCase().lastIndexOf('.')).replace(("."), ("")).replace(("r"), ("")).replace("v", "") + "0");
+	    }
     }
     return current = ret;
   }
