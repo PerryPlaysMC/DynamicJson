@@ -723,4 +723,22 @@ public class DynamicJText extends DynamicTextComponent {
     }
   }
 
+  public void sendActionBar(CommandSender... senders) {
+    String json = toString();
+    String plainText = plainText();
+    for(CommandSender sender : senders) {
+      if(sender instanceof ConsoleCommandSender) send((ConsoleCommandSender) sender, plainText);
+      else if(sender instanceof Player) sendActionBar((Player) sender, json);
+    }
+  }
+
+  public void sendChat(CommandSender... senders) {
+    String json = toString();
+    String plainText = plainText();
+    for(CommandSender sender : senders) {
+      if(sender instanceof ConsoleCommandSender) send((ConsoleCommandSender) sender, plainText);
+      else if(sender instanceof Player) sendChat((Player) sender, json);
+    }
+  }
+
 }
