@@ -12,7 +12,7 @@
   <properties>
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
-    <remapped.version>1.20.6-R0.1-SNAPSHOT</remapped.version>
+    <remapped.version>1.12.1-R0.1-SNAPSHOT</remapped.version>
   </properties>
   <repositories>
     <repository>
