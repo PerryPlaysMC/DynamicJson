@@ -17,7 +17,6 @@ import io.dynamicstudios.json.data.util.Keybind;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.craftbukkit.v1_21_R1.util.JsonHelper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -630,12 +629,12 @@ public class DynamicJText extends DynamicTextComponent {
   public void sendActionBar(Player sender, String json) {
     sendJson(true, sender, json);
   }
-  
+
   public void sendChat(Player sender, String json) {
     sendJson(false, sender, json);
   }
 
-  @Deprecated(forRemoval = true)
+  @Deprecated
   public void send(Player sender, String json) {
     sendJson(false, sender, json);
   }
