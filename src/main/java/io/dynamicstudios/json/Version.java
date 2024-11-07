@@ -23,8 +23,8 @@ public enum Version {
   v1_17(1170), v1_17_R1(1171),
   v1_18(1180), v1_18_R1(1181),
   v1_19(1190), v1_19_R1(1191),
-	v1_20(1200), v1_20_R1(1201), v1_20_R2(1202), v1_20_R4(1204),
-  v1_21(1210),v1_21_R1(1211),
+  v1_20(1200), v1_20_R1(1201), v1_20_R2(1202), v1_20_R4(1204),
+  v1_21(1210), v1_21_R1(1211),
   UNKNOWN(Integer.MAX_VALUE, "Unknown");
 
   static {
@@ -89,8 +89,8 @@ public enum Version {
   }
 
   public static String getCBPackage() {
-	  String version = currentExact().getVersion();
-	  return "org.bukkit.craftbukkit" + (version.contains("R") ? "." + version : "") ;
+    String version = currentExact().getVersion();
+    return "org.bukkit.craftbukkit" + (version.contains("R") ? "." + version : "") ;
   }
 
 
@@ -114,9 +114,9 @@ public enum Version {
     public static Class<?> getClass(String clazz) {
       if(CACHE.containsKey(clazz)) return CACHE.get(clazz);
       Class<?> cls = findClass(getCBPackage() + "." + clazz);
-			if(cls == null) {
-				cls = findClass(getCBPackage() + "." + clazz);
-			}
+      if(cls == null) {
+        cls = findClass(getCBPackage() + "." + clazz);
+      }
       CACHE.put(clazz, cls);
       return cls;
     }
@@ -159,29 +159,24 @@ public enum Version {
     if(exact != null) return exact;
     String pack = Bukkit.getServer().getClass().getPackage().getName();
     String version = pack.substring(pack.lastIndexOf('.') + 1);
-    System.out.println(version);
     Version ret = value(version);
     if(ret == null) {
       ret = Version.UNKNOWN;
-      try {
-        ret.version = version.startsWith("v") ? version : "v" + version;
-        ret.ver = Integer.parseInt(version.toLowerCase().replace(("_"), ("")).replace(("r"), ("")).replace("v", ""));
-      }catch (Exception e) {
-        Pattern pattern = Pattern.compile("(\\d+)\\.(\\d+)-R(\\d+)\\.(\\d+).+");
-        Matcher matcher = pattern.matcher(Bukkit.getBukkitVersion());
-        if(matcher.find()) {
-          ret = value("v" + matcher.group(1) + "_" + matcher.group(2) + "_R" + matcher.group(3));
-          if(ret != null) return ret;
-          ret = Version.UNKNOWN;
-          ret.ver = Integer.parseInt(matcher.group(1) + matcher.group(2) + matcher.group(3));
-          ret.version = "v" + matcher.group(1) + "_" + matcher.group(2) + "_R" + matcher.group(2);
-          return ret;
-        }
-        version = Bukkit.getBukkitVersion().replaceAll("-.+","");
-        System.out.println(Bukkit.getBukkitVersion() + "     " + version);
-        ret.version = (version.startsWith("v") ? version : "v" + version).replace(".","_");
-        ret.ver = Integer.parseInt(version.toLowerCase().replace(("."), ("")).replace(("r"), ("")).replace("v", ""));
+      Pattern pattern = Pattern.compile("(\\d+)\\.(\\d+)-R(\\d+)\\.(\\d+).+");
+      Matcher matcher = pattern.matcher(Bukkit.getBukkitVersion());
+      if(matcher.find()) {
+        ret = value("v" + matcher.group(1) + "_" + matcher.group(2) + "_R" + matcher.group(3));
+        if(ret != null) return exact = ret;
+        ret = Version.UNKNOWN;
+        ret.ver = Integer.parseInt(matcher.group(1) + matcher.group(2) + matcher.group(3));
+        ret.version = "v" + matcher.group(1) + "_" + matcher.group(2) + "_R" + matcher.group(3);
+      } else {
+        version = Bukkit.getBukkitVersion().replaceAll("-.+", "");
+        ret.version = (version.startsWith("v") ? version : "v" + version).replace(".", "_");
+        ret.ver = Integer.parseInt(version.toLowerCase().replaceAll("\\D", ""));
       }
+      if(value(ret.ver) != null) ret = value(ret.ver);
+      else if(value(ret.version) != null) ret = value(ret.version);
     }
     return exact = ret;
   }
@@ -193,24 +188,21 @@ public enum Version {
     Version ret = value(version.split("_R")[0]);
     if(ret == null) {
       ret = Version.UNKNOWN;
-      try {
-        ret.version = version.startsWith("v") ? version : "v" + version;
-        ret.ver = Integer.parseInt(version.toLowerCase().split(("r"))[0].replace(("_"), ("")).replace("v", "") + "0");
-      }catch (Exception e) {
-        Pattern pattern = Pattern.compile("(\\d+)\\.(\\d+)-R(\\d+)\\.(\\d+).+");
-        Matcher matcher = pattern.matcher(Bukkit.getBukkitVersion());
-        if(matcher.find()) {
-          ret = value("v" + matcher.group(1) + "_" + matcher.group(2));
-          if(ret != null) return ret;
-          ret = Version.UNKNOWN;
-          ret.ver = Integer.parseInt(matcher.group(1) + matcher.group(2) + "0");
-          ret.version = "v" + matcher.group(1) + "_" + matcher.group(2);
-          return ret;
-        }
-        version = Bukkit.getBukkitVersion().replaceAll("-.+","");
-        ret.version = (version.startsWith("v") ? version : "v" + version).replace(".","_");
-        ret.ver = Integer.parseInt(version.toLowerCase().substring(0,version.toLowerCase().lastIndexOf('.')).replace(("."), ("")).replace(("r"), ("")).replace("v", "") + "0");
+      Pattern pattern = Pattern.compile("(\\d+)\\.(\\d+)-R(\\d+)\\.(\\d+).+");
+      Matcher matcher = pattern.matcher(Bukkit.getBukkitVersion());
+      if(matcher.find()) {
+        ret = value("v" + matcher.group(1) + "_" + matcher.group(2));
+        if(ret != null) return current = ret;
+        ret = Version.UNKNOWN;
+        ret.ver = Integer.parseInt(matcher.group(1) + matcher.group(2) + "0");
+        ret.version = "v" + matcher.group(1) + "_" + matcher.group(2);
+      } else {
+        version = Bukkit.getBukkitVersion().replaceAll("-.+", "");
+        ret.version = (version.startsWith("v") ? version : "v" + version).replace(".", "_");
+        ret.ver = Integer.parseInt(version.toLowerCase().replaceAll("\\D", ""));
       }
+      if(value(ret.ver) != null) ret = value(ret.ver);
+      else if(value(ret.version) != null) ret = value(ret.version);
     }
     return current = ret;
   }
@@ -223,6 +215,12 @@ public enum Version {
   public static Version value(String versionId) {
     for(Version version : values())
       if(versionId.equalsIgnoreCase(version.name()) || versionId.equalsIgnoreCase(version.getVersion()))
+        return version;
+    return null;
+  }
+  public static Version value(int versionId) {
+    for(Version version : values())
+      if(versionId == version.ver)
         return version;
     return null;
   }
