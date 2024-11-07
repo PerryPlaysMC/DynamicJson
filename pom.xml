@@ -4,14 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>dev.dynamicstudios.json</groupId>
+  <groupId>io.dynamicstudios.json</groupId>
   <artifactId>DynamicJson</artifactId>
+  <version>2.1.1</version>
   <packaging>jar</packaging>
-  <version>2.1.0</version>
 
   <properties>
     <maven.compiler.source>8</maven.compiler.source>
-    <maven.compiler.target>8</maven.compiler.target>
+    <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <remapped.version>1.20.6-R0.1-SNAPSHOT</remapped.version>
   </properties>
   <repositories>
@@ -24,14 +24,14 @@
   <dependencies>
     <dependency>
       <groupId>org.spigotmc</groupId>
-      <artifactId>spigot-api</artifactId>
-      <version>1.20.1-R0.1-SNAPSHOT</version>
+      <artifactId>spigot</artifactId>
+      <version>1.21-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-all</artifactId>
-      <version>4.1.86.Final</version>
+      <groupId>org.spigotmc</groupId>
+      <artifactId>spigot-api</artifactId>
+      <version>1.21-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
