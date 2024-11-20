@@ -23,12 +23,6 @@
   </repositories>
 
   <dependencies>
-        <dependency>
-          <groupId>org.spigotmc</groupId>
-          <artifactId>spigot</artifactId>
-          <version>${remapped.version}</version>
-          <scope>provided</scope>
-        </dependency>
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
