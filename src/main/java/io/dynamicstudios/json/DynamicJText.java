@@ -148,6 +148,17 @@ public class DynamicJText extends DynamicTextComponent {
     super.edit().hover(text);
     return dirtify();
   }
+  @Override
+  public DynamicJText hover(List<String> text) {
+    super.edit().tooltip(text);
+    return dirtify();
+  }
+
+  @Override
+  public DynamicJText hoverPlain(List<String> text) {
+    super.edit().tooltip(text);
+    return dirtify();
+  }
 
   @Override
   public DynamicJText hoverPlain(String... text) {
@@ -176,6 +187,17 @@ public class DynamicJText extends DynamicTextComponent {
   @Override
   public DynamicJText tooltipPlain(String... text) {
     super.edit().tooltipPlain(text);
+    return dirtify();
+  }
+  @Override
+  public DynamicJText tooltip(List<String> text) {
+    super.edit().tooltip(text);
+    return dirtify();
+  }
+
+  @Override
+  public DynamicJText tooltipPlain(List<String> text) {
+    super.edit().tooltip(text);
     return dirtify();
   }
 

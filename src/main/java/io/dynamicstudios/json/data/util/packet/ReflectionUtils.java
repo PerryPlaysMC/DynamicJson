@@ -13,9 +13,9 @@ public class ReflectionUtils {
   private static final HashMap<Class<?>, HashMap<CacheHolder, Constructor<?>>> CONSTRUCTOR_CACHE = new HashMap<>();
 
   public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... params) {
-	  CacheHolder key = new CacheHolder(null, clazz, params, null);
-	  if(CONSTRUCTOR_CACHE.containsKey(clazz)) {
-		  if(CONSTRUCTOR_CACHE.get(clazz).containsKey(key)) return CONSTRUCTOR_CACHE.get(clazz).get(key);
+    CacheHolder key = new CacheHolder(null, clazz, params, null);
+    if(CONSTRUCTOR_CACHE.containsKey(clazz)) {
+      if(CONSTRUCTOR_CACHE.get(clazz).containsKey(key)) return CONSTRUCTOR_CACHE.get(clazz).get(key);
     }
     Set<Constructor<?>> methods = new HashSet<>();
     Collections.addAll(methods, clazz.getConstructors());
@@ -28,16 +28,16 @@ public class ReflectionUtils {
             match = false;
             break;
           }
-	      HashMap<CacheHolder, Constructor<?>> map = CONSTRUCTOR_CACHE.getOrDefault(clazz, new HashMap<>());
-	      if(match) {
-		      map.put(key, constructor);
+        HashMap<CacheHolder, Constructor<?>> map = CONSTRUCTOR_CACHE.getOrDefault(clazz, new HashMap<>());
+        if(match) {
+          map.put(key, constructor);
           CONSTRUCTOR_CACHE.put(clazz, map);
           return constructor;
         }else {
-					if(!map.containsKey(key)) {
-						map.put(key, null);
-						CONSTRUCTOR_CACHE.put(clazz, map);
-					}
+          if(!map.containsKey(key)) {
+            map.put(key, null);
+            CONSTRUCTOR_CACHE.put(clazz, map);
+          }
         }
       }
     }
@@ -52,16 +52,46 @@ public class ReflectionUtils {
     }
     Set<Field> fields = new HashSet<>();
     Collections.addAll(fields, clazz.getFields());
-	  Collections.addAll(fields, clazz.getDeclaredFields());
-		if(clazz.getSuperclass() != null) {
-			Collections.addAll(fields, clazz.getSuperclass().getDeclaredFields());
-			Collections.addAll(fields, clazz.getSuperclass().getFields());
-		}
+    Collections.addAll(fields, clazz.getDeclaredFields());
+    if(clazz.getSuperclass() != null) {
+      Collections.addAll(fields, clazz.getSuperclass().getDeclaredFields());
+      Collections.addAll(fields, clazz.getSuperclass().getFields());
+    }
     for(Field field : fields) {
       if(field.getType().getName().equals(returnType.getName())) {
-				field.setAccessible(true);
+        field.setAccessible(true);
         HashMap<CacheHolder, Field> map = FIELD_CACHE.getOrDefault(clazz, new HashMap<>());
         map.put(new CacheHolder(null, returnType, null, null), field);
+        FIELD_CACHE.put(clazz, map);
+        return field;
+      }
+    }
+    return null;
+  }
+
+  public static Field getField(Class<?> clazz, Class<?> returnType, String... possibleNames) {
+    if(clazz == null) return null;
+    if(FIELD_CACHE.containsKey(clazz) && FIELD_CACHE.get(clazz) != null) {
+      for (String possibleName : possibleNames) {
+        CacheHolder cache = new CacheHolder(possibleName, returnType, null, null);
+        if(FIELD_CACHE.get(clazz).containsKey(cache)) return FIELD_CACHE.get(clazz).get(cache);
+      }
+      CacheHolder cache = new CacheHolder(String.join(", ", possibleNames).toLowerCase(), returnType, null, null);
+      if(FIELD_CACHE.get(clazz).containsKey(cache)) return FIELD_CACHE.get(clazz).get(cache);
+    }
+    Set<Field> fields = new HashSet<>();
+    Collections.addAll(fields, clazz.getFields());
+    Collections.addAll(fields, clazz.getDeclaredFields());
+    if(clazz.getSuperclass() != null) {
+      Collections.addAll(fields, clazz.getSuperclass().getDeclaredFields());
+      Collections.addAll(fields, clazz.getSuperclass().getFields());
+    }
+    List<String> names = new ArrayList<>(Arrays.asList(possibleNames));
+    for(Field field : fields) {
+      if(field.getType().getName().equals(returnType.getName()) || names.contains(field.getName())) {
+        field.setAccessible(true);
+        HashMap<CacheHolder, Field> map = FIELD_CACHE.getOrDefault(clazz, new HashMap<>());
+        map.put(new CacheHolder(names.contains(field.getName()) ? field.getName() : String.join(", ", possibleNames), returnType, null, null), field);
         FIELD_CACHE.put(clazz, map);
         return field;
       }

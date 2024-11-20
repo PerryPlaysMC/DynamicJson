@@ -7,6 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Creator: PerryPlaysMC
@@ -142,6 +143,15 @@ public class DynamicScoreComponent extends DynamicComponent {
   public DynamicScoreComponent hoverPlain(String... text) {
     return (DynamicScoreComponent) super.hoverPlain(text);
   }
+  @Override
+  public DynamicScoreComponent hover(List<String> text) {
+    return (DynamicScoreComponent) super.hover(text);
+  }
+
+  @Override
+  public DynamicScoreComponent hoverPlain(List<String> text) {
+    return (DynamicScoreComponent) super.hoverPlain(text);
+  }
 
   @Override
   public DynamicScoreComponent hover(ItemStack item) {
@@ -160,6 +170,15 @@ public class DynamicScoreComponent extends DynamicComponent {
 
   @Override
   public DynamicScoreComponent tooltipPlain(String... text) {
+    return (DynamicScoreComponent) super.tooltipPlain(text);
+  }
+  @Override
+  public DynamicScoreComponent tooltip(List<String> text) {
+    return (DynamicScoreComponent) super.tooltip(text);
+  }
+
+  @Override
+  public DynamicScoreComponent tooltipPlain(List<String> text) {
     return (DynamicScoreComponent) super.tooltipPlain(text);
   }
 

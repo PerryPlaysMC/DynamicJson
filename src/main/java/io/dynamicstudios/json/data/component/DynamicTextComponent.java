@@ -189,6 +189,15 @@ public class DynamicTextComponent extends DynamicComponent {
   public DynamicTextComponent hoverPlain(String... text) {
     return (DynamicTextComponent) super.hoverPlain(text);
   }
+  @Override
+  public DynamicTextComponent hover(List<String> text) {
+    return (DynamicTextComponent) super.hover(text);
+  }
+
+  @Override
+  public DynamicTextComponent hoverPlain(List<String> text) {
+    return (DynamicTextComponent) super.hoverPlain(text);
+  }
 
   @Override
   public DynamicTextComponent hover(ItemStack item) {
@@ -207,6 +216,15 @@ public class DynamicTextComponent extends DynamicComponent {
 
   @Override
   public DynamicTextComponent tooltipPlain(String... text) {
+    return (DynamicTextComponent) super.tooltipPlain(text);
+  }
+  @Override
+  public DynamicTextComponent tooltip(List<String> text) {
+    return (DynamicTextComponent) super.tooltip(text);
+  }
+
+  @Override
+  public DynamicTextComponent tooltipPlain(List<String> text) {
     return (DynamicTextComponent) super.tooltipPlain(text);
   }
 

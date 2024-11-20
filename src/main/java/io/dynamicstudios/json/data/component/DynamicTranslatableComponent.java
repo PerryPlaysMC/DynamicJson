@@ -8,6 +8,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Creator: PerryPlaysMC
@@ -138,6 +139,16 @@ public class DynamicTranslatableComponent extends DynamicComponent {
   }
 
   @Override
+  public DynamicTranslatableComponent hover(List<String> text) {
+    return (DynamicTranslatableComponent) super.hover(text);
+  }
+
+  @Override
+  public DynamicTranslatableComponent hoverPlain(List<String> text) {
+    return (DynamicTranslatableComponent) super.hoverPlain(text);
+  }
+
+  @Override
   public DynamicTranslatableComponent hover(ItemStack item) {
     return (DynamicTranslatableComponent) super.hover(item);
   }
@@ -154,6 +165,15 @@ public class DynamicTranslatableComponent extends DynamicComponent {
 
   @Override
   public DynamicTranslatableComponent tooltipPlain(String... text) {
+    return (DynamicTranslatableComponent) super.tooltipPlain(text);
+  }
+  @Override
+  public DynamicTranslatableComponent tooltip(List<String> text) {
+    return (DynamicTranslatableComponent) super.tooltip(text);
+  }
+
+  @Override
+  public DynamicTranslatableComponent tooltipPlain(List<String> text) {
     return (DynamicTranslatableComponent) super.tooltipPlain(text);
   }
 

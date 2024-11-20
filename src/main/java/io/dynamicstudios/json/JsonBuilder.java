@@ -159,7 +159,11 @@ public class JsonBuilder {
 
 
   private void string(String value) {
-    if(!value.equals("true") && !value.equals("false")) this.stringBuilder.append('"');
+    prepareString(this.stringBuilder, value);
+  }
+
+  public static void prepareString(StringBuilder sb, String value) {
+    if(!value.equals("true") && !value.equals("false")) sb.append('"');
     int last = 0;
     int length = value.length();
     char[] chars = value.toCharArray();
@@ -174,12 +178,12 @@ public class JsonBuilder {
         if(c != '\u2029') continue;
         replacement = "\\u2029";
       }
-      if(last < i) this.stringBuilder.append(chars, last, i - last);
-      this.stringBuilder.append(replacement);
+      if(last < i) sb.append(chars, last, i - last);
+      sb.append(replacement);
       last = i + 1;
     }
-    if(last < length) this.stringBuilder.append(chars, last, length - last);
-    if(!value.equals("true") && !value.equals("false")) this.stringBuilder.append('"');
+    if(last < length) sb.append(chars, last, length - last);
+    if(!value.equals("true") && !value.equals("false")) sb.append('"');
   }
 
 

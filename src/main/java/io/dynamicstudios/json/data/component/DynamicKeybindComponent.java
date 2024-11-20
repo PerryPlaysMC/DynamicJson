@@ -5,6 +5,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Creator: PerryPlaysMC
@@ -136,6 +137,16 @@ public class DynamicKeybindComponent extends DynamicComponent {
   }
 
   @Override
+  public DynamicKeybindComponent hover(List<String> text) {
+    return (DynamicKeybindComponent) super.hover(text);
+  }
+
+  @Override
+  public DynamicKeybindComponent hoverPlain(List<String> text) {
+    return (DynamicKeybindComponent) super.hoverPlain(text);
+  }
+
+  @Override
   public DynamicKeybindComponent hover(ItemStack item) {
     return (DynamicKeybindComponent) super.hover(item);
   }
@@ -152,6 +163,15 @@ public class DynamicKeybindComponent extends DynamicComponent {
 
   @Override
   public DynamicKeybindComponent tooltipPlain(String... text) {
+    return (DynamicKeybindComponent) super.tooltipPlain(text);
+  }
+  @Override
+  public DynamicKeybindComponent tooltip(List<String> text) {
+    return (DynamicKeybindComponent) super.tooltip(text);
+  }
+
+  @Override
+  public DynamicKeybindComponent tooltipPlain(List<String> text) {
     return (DynamicKeybindComponent) super.tooltipPlain(text);
   }
 

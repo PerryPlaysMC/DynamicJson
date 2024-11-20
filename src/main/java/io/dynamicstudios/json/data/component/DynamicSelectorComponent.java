@@ -8,6 +8,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Creator: PerryPlaysMC
@@ -130,6 +131,15 @@ public class DynamicSelectorComponent extends DynamicComponent {
   public DynamicSelectorComponent hoverPlain(String... text) {
     return (DynamicSelectorComponent) super.hoverPlain(text);
   }
+  @Override
+  public DynamicSelectorComponent hover(List<String> text) {
+    return (DynamicSelectorComponent) super.hover(text);
+  }
+
+  @Override
+  public DynamicSelectorComponent hoverPlain(List<String> text) {
+    return (DynamicSelectorComponent) super.hoverPlain(text);
+  }
 
   @Override
   public DynamicSelectorComponent hover(ItemStack item) {
@@ -148,6 +158,15 @@ public class DynamicSelectorComponent extends DynamicComponent {
 
   @Override
   public DynamicSelectorComponent tooltipPlain(String... text) {
+    return (DynamicSelectorComponent) super.tooltipPlain(text);
+  }
+  @Override
+  public DynamicSelectorComponent tooltip(List<String> text) {
+    return (DynamicSelectorComponent) super.tooltip(text);
+  }
+
+  @Override
+  public DynamicSelectorComponent tooltipPlain(List<String> text) {
     return (DynamicSelectorComponent) super.tooltipPlain(text);
   }
 

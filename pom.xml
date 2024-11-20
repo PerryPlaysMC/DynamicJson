@@ -6,7 +6,7 @@
 
   <groupId>io.dynamicstudios.json</groupId>
   <artifactId>DynamicJson</artifactId>
-  <version>2.1.1</version>
+  <version>2.1.2</version>
   <packaging>jar</packaging>
 
   <properties>
@@ -23,6 +23,12 @@
   </repositories>
 
   <dependencies>
+        <dependency>
+          <groupId>org.spigotmc</groupId>
+          <artifactId>spigot</artifactId>
+          <version>${remapped.version}</version>
+          <scope>provided</scope>
+        </dependency>
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>

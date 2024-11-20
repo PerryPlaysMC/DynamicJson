@@ -90,6 +90,15 @@ public interface IComponent extends IJson, Cloneable {
     return hover(DynamicHoverAction.SHOW_TEXT, String.join("\n", text));
   }
 
+
+  default IComponent hover(List<String> text) {
+    return hover(DynamicHoverAction.SHOW_TEXT, CColor.translateCommon(String.join("\n", text)));
+  }
+
+  default IComponent hoverPlain(List<String> text) {
+    return hover(DynamicHoverAction.SHOW_TEXT, String.join("\n", text));
+  }
+
   default IComponent hover(ItemStack item) {
     return hover(DynamicHoverAction.SHOW_ITEM, CColor.translateCommon(DynamicHoverAction.itemstackToString(item)));
   }
@@ -105,6 +114,14 @@ public interface IComponent extends IJson, Cloneable {
   }
 
   default IComponent tooltipPlain(String... text) {
+    return hoverPlain(text);
+  }
+
+  default IComponent tooltip(List<String> text) {
+    return hover(text);
+  }
+
+  default IComponent tooltipPlain(List<String> text) {
     return hoverPlain(text);
   }
 

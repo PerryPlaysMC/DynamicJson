@@ -8,6 +8,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -164,6 +165,15 @@ public class DynamicNBTComponent extends DynamicComponent {
   public DynamicNBTComponent hoverPlain(String... text) {
     return (DynamicNBTComponent) super.hoverPlain(text);
   }
+  @Override
+  public DynamicNBTComponent hover(List<String> text) {
+    return (DynamicNBTComponent) super.hover(text);
+  }
+
+  @Override
+  public DynamicNBTComponent hoverPlain(List<String> text) {
+    return (DynamicNBTComponent) super.hoverPlain(text);
+  }
 
   @Override
   public DynamicNBTComponent hover(ItemStack item) {
@@ -182,6 +192,15 @@ public class DynamicNBTComponent extends DynamicComponent {
 
   @Override
   public DynamicNBTComponent tooltipPlain(String... text) {
+    return (DynamicNBTComponent) super.tooltipPlain(text);
+  }
+  @Override
+  public DynamicNBTComponent tooltip(List<String> text) {
+    return (DynamicNBTComponent) super.tooltip(text);
+  }
+
+  @Override
+  public DynamicNBTComponent tooltipPlain(List<String> text) {
     return (DynamicNBTComponent) super.tooltipPlain(text);
   }
 

@@ -207,6 +207,15 @@ public class DynamicGradientComponent extends DynamicComponent implements IChild
     else edit().hoverPlain(text);
     return dirtify();
   }
+  @Override
+  public DynamicGradientComponent hover(List<String> text) {
+    return (DynamicGradientComponent) super.hover(text);
+  }
+
+  @Override
+  public DynamicGradientComponent hoverPlain(List<String> text) {
+    return (DynamicGradientComponent) super.hoverPlain(text);
+  }
 
   @Override
   public DynamicGradientComponent hover(ItemStack item) {
@@ -234,6 +243,16 @@ public class DynamicGradientComponent extends DynamicComponent implements IChild
     if(edit().isEmpty()) super.tooltipPlain(text);
     else edit().tooltipPlain(text);
     return dirtify();
+  }
+
+  @Override
+  public DynamicGradientComponent tooltip(List<String> text) {
+    return (DynamicGradientComponent) super.tooltip(text);
+  }
+
+  @Override
+  public DynamicGradientComponent tooltipPlain(List<String> text) {
+    return (DynamicGradientComponent) super.tooltipPlain(text);
   }
 
   @Override
