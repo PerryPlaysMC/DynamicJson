@@ -13,15 +13,12 @@
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <java.version>8</java.version>
+    <remapped.version>1.12.1-R0.1-SNAPSHOT</remapped.version>
   </properties>
   <repositories>
     <repository>
-      <id>spigotmc-releases</id>
-      <url>https://hub.spigotmc.org/nexus/content/repositories/public/</url>
-    </repository>
-    <repository>
-      <id>maven-central</id>
-      <url>https://repo.maven.apache.org/maven2</url>
+      <id>spigot-repo</id>
+      <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
   </repositories>
 
@@ -29,7 +26,7 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
-      <version>1.12-R0.1-SNAPSHOT</version>
+      <version>${remapped.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
