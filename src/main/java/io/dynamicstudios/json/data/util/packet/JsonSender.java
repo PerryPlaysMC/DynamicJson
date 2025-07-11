@@ -9,6 +9,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.UUID;
 
 /**
  * Creator: PerryPlaysMC
@@ -41,6 +42,10 @@ public class JsonSender {
 
 	public static void sendJson(String json, Player... players) {
 		sendJson(new PacketSendChat(json, PacketSendChat.ChatMessageType.DEFAULT_CHAT), players);
+	}
+
+	public static void sendJson(String json, UUID from, Player... players) {
+		sendJson(new PacketSendChat(json, PacketSendChat.ChatMessageType.DEFAULT_CHAT, from), players);
 	}
 
 	public static void sendAction(String json, Player... players) {

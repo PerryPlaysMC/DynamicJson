@@ -21,10 +21,10 @@ public enum Version {
   v1_15(1150), v1_15_R1(1151),
   v1_16(1160), v1_16_R1(1161), v1_16_R2(1162), v1_16_R3(1163),
   v1_17(1170), v1_17_R1(1171),
-  v1_18(1180), v1_18_R1(1181),
-  v1_19(1190), v1_19_R1(1191),
-  v1_20(1200), v1_20_R1(1201), v1_20_R2(1202), v1_20_R4(1204),
-  v1_21(1210), v1_21_R1(1211),
+  v1_18(1180), v1_18_R1(1181), v1_18_R2(1182), v1_18_R3(1183), v1_18_R4(1184),
+  v1_19(1190), v1_19_R1(1191), v1_19_R2(1192), v1_19_R3(1193), v1_19_R4(1194),
+  v1_20(1200), v1_20_R1(1201), v1_20_R2(1202), v1_20_R4(1204), v1_20_R5(1205), v1_20_R6(1206),
+  v1_21(1210), v1_21_R1(1211), v1_21_R2(1212), v1_21_R3(1213), v1_21_R4(1214), v1_21_R5(1215), v1_21_R6(1216),
   UNKNOWN(Integer.MAX_VALUE, "Unknown");
 
   static {
@@ -162,6 +162,11 @@ public enum Version {
     Version ret = value(version);
     if(ret == null) {
       ret = Version.UNKNOWN;
+      if(version.matches("v\\d+_\\d+_R\\d+")) {
+        ret.ver = Integer.parseInt(version.replace("v", "").replace("R", "").replace("_", ""));
+        ret.version = version;
+        return exact = ret;
+      }
       Pattern pattern = Pattern.compile("(\\d+)\\.(\\d+)-R(\\d+)\\.(\\d+).+");
       Matcher matcher = pattern.matcher(Bukkit.getBukkitVersion());
       if(matcher.find()) {
@@ -188,6 +193,11 @@ public enum Version {
     Version ret = value(version.split("_R")[0]);
     if(ret == null) {
       ret = Version.UNKNOWN;
+      if(version.matches("v\\d+_\\d+_R\\d+")) {
+        ret.ver = Integer.parseInt(version.replace("v", "").split("R")[0].replace("_", ""));
+        ret.version = version;
+        return exact = ret;
+      }
       Pattern pattern = Pattern.compile("(\\d+)\\.(\\d+)-R(\\d+)\\.(\\d+).+");
       Matcher matcher = pattern.matcher(Bukkit.getBukkitVersion());
       if(matcher.find()) {

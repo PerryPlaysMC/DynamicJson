@@ -656,11 +656,27 @@ public class DynamicJText extends DynamicTextComponent {
     sendJson(false, sender, json);
   }
 
+  public void sendChat(UUID from, Player sender, String json) {
+    sendJson(false, from, sender, json);
+  }
+
   @Deprecated
   public void send(Player sender, String json) {
     sendJson(false, sender, json);
   }
+
   public void sendJson(boolean action, Player sender, String json) {
+    json = prepareJson(sender, json);
+    if(action) JsonSender.sendAction(json, sender);
+    else JsonSender.sendJson(json, sender);
+  }
+  public void sendJson(boolean action, UUID from, Player sender, String json) {
+    json = prepareJson(sender, json);
+    if(action) JsonSender.sendAction(json, sender);
+    else JsonSender.sendJson(json, from, sender);
+  }
+
+  private String prepareJson(Player sender, String json) {
     for(Map.Entry<String, Function<CommandSender, String>> replacement : REPLACEMENTS.entrySet()) {
       Matcher matcher = REPLACEMENT_SEARCH.matcher(json);
       while(matcher.find()) {
@@ -726,10 +742,23 @@ public class DynamicJText extends DynamicTextComponent {
       scoreRegex = SCORE_SEARCH.matcher(json);
     }
     if(Version.isCurrentHigher(Version.v1_15)) json = json.replaceAll("(\"hoverEvent\":\\{\"action\":\"[^\"]+\",)\"value\":", "$1\"contents\":");
-    if(action) JsonSender.sendAction(json, sender);
-    else JsonSender.sendJson(json, sender);
+    return json;
   }
 
+  private void send(UUID from, ConsoleCommandSender sender, String json) {
+    for(Map.Entry<String, Function<CommandSender, String>> replacement : REPLACEMENTS.entrySet())
+      if(json.contains(replacement.getKey())) json = json.replace(replacement.getKey(), replacement.getValue().apply(sender));
+    sender.sendMessage(json);
+  }
+
+  public void send(UUID from, CommandSender... senders) {
+    String json = toString();
+    String plainText = plainText();
+    for(CommandSender sender : senders) {
+      if(sender instanceof ConsoleCommandSender) send((ConsoleCommandSender) sender, plainText);
+      else if(sender instanceof Player) send((Player) sender, json);
+    }
+  }
   private void send(ConsoleCommandSender sender, String json) {
     for(Map.Entry<String, Function<CommandSender, String>> replacement : REPLACEMENTS.entrySet())
       if(json.contains(replacement.getKey())) json = json.replace(replacement.getKey(), replacement.getValue().apply(sender));
@@ -760,6 +789,16 @@ public class DynamicJText extends DynamicTextComponent {
     for(CommandSender sender : senders) {
       if(sender instanceof ConsoleCommandSender) send((ConsoleCommandSender) sender, plainText);
       else if(sender instanceof Player) sendChat((Player) sender, json);
+    }
+  }
+
+
+  public void sendChat(UUID from, CommandSender... senders) {
+    String json = toString();
+    String plainText = plainText();
+    for(CommandSender sender : senders) {
+      if(sender instanceof ConsoleCommandSender) send((ConsoleCommandSender) sender, plainText);
+      else if(sender instanceof Player) sendChat(from, (Player) sender, json);
     }
   }
 

@@ -486,7 +486,7 @@ public abstract class DynamicComponent implements IComponent {
     complete();
     if(length() == 0) return;
     if(keyType().equals("text") &&
-       !(this instanceof IChildPriority) && children().size() == 1 && children().get(0).children().size() == 0 &&
+       !(this instanceof IChildPriority) && children().size() == 1 && children().get(0).children().isEmpty() &&
        children().get(0).keyType().equals("text")) {
       IComponent child = children().get(0);
       if(!hasData(ExcludeCheck.TEXT, ExcludeCheck.CHILDREN)) {
@@ -535,13 +535,13 @@ public abstract class DynamicComponent implements IComponent {
         clean();
         return;
       }
-      hasChildren = children().stream().filter(IComponent::canWriteJson).anyMatch(c -> c.length() > 0);
+      hasChildren = children().stream().filter(IComponent::canWriteJson).anyMatch(c -> !c.isEmpty());
       if(keyType().equals("text"))
-        if(children().size() == 1 && children().get(0).children().size() == 0
+        if(children().size() == 1 && children().get(0).children().isEmpty()
            && !equalsIgnoreChildren(EMPTY_COMPONENT)&& keyType().equals(children().get(0).keyType())) {
-          keyValue(children().remove(0).keyValue());
+          keyValue(children().get(0).keyValue());
         } else if(equalsIgnoreChildren(EMPTY_COMPONENT)) {
-          children().remove(0).writeJson(builder);
+          children().get(0).writeJson(builder);
           clean();
           return;
         }
@@ -556,7 +556,9 @@ public abstract class DynamicComponent implements IComponent {
     if(!children().isEmpty()) {
       if(hasChildren) {
         builder.name("extra").beginArray();
-        for(IComponent child : children()) child.writeJson(builder);
+        for(IComponent child : children()) {
+          child.writeJson(builder);
+        }
         builder.end();
       }
     }
@@ -748,7 +750,9 @@ public abstract class DynamicComponent implements IComponent {
             continue;
           }
         }
-        if(!componentList.contains(current)) componentList.add(current);
+        if(!componentList.contains(current) && !ignore.contains(current))  {
+          componentList.add(current);
+        }
         continue;
       }
       if(componentList.contains(current)) continue;
@@ -763,7 +767,9 @@ public abstract class DynamicComponent implements IComponent {
              parent.isGradient() ? new ExcludeCheck[]{ExcludeCheck.COLOR} : new ExcludeCheck[0])) {
             prevParent.children().add(parent);
             continue;
-          } else componentList.add(parent);
+          } else  {
+            componentList.add(parent);
+          }
           prevParent = parent;
         }
         if(parent!=null) {
@@ -773,7 +779,6 @@ public abstract class DynamicComponent implements IComponent {
             componentList.add(prev);
           }
         }
-
         parent = null;
       }
       componentList.add(current);
@@ -791,8 +796,10 @@ public abstract class DynamicComponent implements IComponent {
     }
     for(IComponent iComponent : componentList) setParents(iComponent);
     if(componentList.size() == 1&&!componentList.get(0).children().isEmpty()) {
-      this.applyData(componentList.get(0));
-      componentList.addAll(componentList.remove(0).children());
+      if(!componentList.get(0).children().get(0).isGradient()) {
+        this.applyData(componentList.get(0));
+        componentList.addAll(componentList.remove(0).children());
+      }
     }
     components.clear();
     components.addAll(componentList);

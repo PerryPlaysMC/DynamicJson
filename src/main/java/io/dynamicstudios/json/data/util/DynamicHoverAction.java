@@ -41,21 +41,23 @@ public enum DynamicHoverAction implements Serializable {
     registryOps = Version.Minecraft.getClass("resources.RegistryOps");
     CODEC = ReflectionUtils.getField(nmsStackC, codecClazz, "Codec");
     Method asNMS1 = null, save1 = null;
-    try {
-      asNMS1 = cbStack.getMethod("asNMSCopy", ItemStack.class);
-      save1 = nmsStackC.getMethod("save", cmp);
-    } catch (Exception e) {
-    }
-    try {
-      if(asNMS1 == null) asNMS1 = cbStack.getMethod("asNMSCopy", ItemStack.class);
-      if(save1 == null) save1 = ReflectionUtils.getMethod(nmsStackC, cmp, cmp);
-    } catch (NoSuchMethodException e1) {
-    }
-    try {
-      if(asNMS1 == null) asNMS1 = cbStack.getMethod("asNMSCopy", ItemStack.class);
-      if(save1 == null) save1 = ReflectionUtils.getMethod(nmsStackC, comp);
-    } catch (NoSuchMethodException e1) {
-      e1.printStackTrace();
+    if(cbStack != null) {
+      try {
+        asNMS1 = cbStack.getMethod("asNMSCopy", ItemStack.class);
+        save1 = nmsStackC.getMethod("save", cmp);
+      } catch (Exception e) {
+      }
+      try {
+        if(asNMS1 == null) asNMS1 = cbStack.getMethod("asNMSCopy", ItemStack.class);
+        if(save1 == null) save1 = ReflectionUtils.getMethod(nmsStackC, cmp, cmp);
+      } catch (NoSuchMethodException e1) {
+      }
+      try {
+        if(asNMS1 == null) asNMS1 = cbStack.getMethod("asNMSCopy", ItemStack.class);
+        if(save1 == null) save1 = ReflectionUtils.getMethod(nmsStackC, comp);
+      } catch (NoSuchMethodException e1) {
+        e1.printStackTrace();
+      }
     }
     asNMS = asNMS1;
     save = save1;
@@ -67,15 +69,19 @@ public enum DynamicHoverAction implements Serializable {
     getAsString = ReflectionUtils.getMethod(ItemMeta.class, "getAsString");
     if(getAsString != null)getAsString.setAccessible(true);
     Field INSTANCE1 = null;
-    try {
-      getMinecraftRegistry1 = ReflectionUtils.getMethod(craftRegistry, iregistryCustom);
-      createSerializationContext1 = ReflectionUtils.getMethod(getMinecraftRegistry1.getReturnType(), registryOps, dynamicOps);
-      emptymap1 = ReflectionUtils.getMethod(dynamicOps, "emptyMap");
-      encode1 = ReflectionUtils.getMethod(CODEC.getType(), dataResult, Object.class, dynamicOps, Object.class);
-      getOrThrow1 = ReflectionUtils.getMethod(dataResult, "getOrThrow");
-      INSTANCE1 = ReflectionUtils.getField(jsonOps, jsonOps);
-    }catch(Exception e) {
-      e.printStackTrace();
+    if(getAsString == null && asNMS1 != null && craftRegistry != null) {
+      try {
+        getMinecraftRegistry1 = ReflectionUtils.getMethod(craftRegistry, iregistryCustom);
+        if(getMinecraftRegistry1 != null) {
+          createSerializationContext1 = ReflectionUtils.getMethod(getMinecraftRegistry1.getReturnType(), registryOps, dynamicOps);
+          emptymap1 = ReflectionUtils.getMethod(dynamicOps, "emptyMap");
+          encode1 = ReflectionUtils.getMethod(CODEC.getType(), dataResult, Object.class, dynamicOps, Object.class);
+          getOrThrow1 = ReflectionUtils.getMethod(dataResult, "getOrThrow");
+          INSTANCE1 = ReflectionUtils.getField(jsonOps, jsonOps);
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
     INSTANCE = INSTANCE1;
     getMinecraftRegistry = getMinecraftRegistry1;
@@ -87,9 +93,8 @@ public enum DynamicHoverAction implements Serializable {
   public static String itemstackToString(ItemStack item) {
     try {
       if(item == null) item = new ItemStack(Material.AIR);
-      if(nmsStackC == null || cbStack == null || cmp == null) return "";
       Object nmsStack = asNMS.invoke(null, item);
-      if(comp != null) {
+      if(cmp == null) {
         if(getAsString == null) {
           return save.invoke(asNMS.invoke(null,item)).toString();
         }
@@ -118,6 +123,7 @@ public enum DynamicHoverAction implements Serializable {
         if(itemStr.length() == 2) return "{\"id\":\"" + item.getType().name().toLowerCase() + "\",\"count\":1}";
         return "{\"id\":\""+item.getType().name().toLowerCase() + "\",\"count\":1,\"components\":" + itemStr + "}"; //((Optional<?>)nmsStack.getClass().getMethod("b").invoke(nmsStack)).orElse(null).toString();
       }
+      if(nmsStackC == null || cbStack == null) return "";
       return save.invoke(nmsStack, cmp.newInstance()).toString();
     } catch (Exception e) {
       e.printStackTrace();
