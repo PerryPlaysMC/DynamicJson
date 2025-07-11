@@ -13,7 +13,6 @@
     <maven.compiler.source>8</maven.compiler.source>
     <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     <java.version>8</java.version>
-    <remapped.version>1.12.1-R0.1-SNAPSHOT</remapped.version>
   </properties>
   <repositories>
     <repository>
@@ -26,7 +25,7 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
-      <version>${remapped.version}</version>
+      <version>1.21.5-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
