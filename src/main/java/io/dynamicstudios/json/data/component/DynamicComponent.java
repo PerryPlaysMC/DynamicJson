@@ -472,6 +472,7 @@ public abstract class DynamicComponent implements IComponent {
 
   @Override
   public String plainText() {
+    complete();
     String color = "§r";
     if(color() != CColor.NONE)
       if(parent == null || (!(parent.color() == CColor.NONE && color() == CColor.WHITE))) color = this.color.toString();

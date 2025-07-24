@@ -48,7 +48,7 @@ public class DynamicJText extends DynamicTextComponent {
   private static final String NBT_SEARCH_REGEX = "\\\"nbt\\\":\\s*\\\"(?<path>[^\\\"]+)\\\",\\\"entity\\\":\\\"(?<entity>[a-z0-9]{8}-(?:[a-z0-9]{4}-){3}[a-z0-9]{12})\\\"\\}";
   private static final Pattern NBT_SEARCH = Pattern.compile(NBT_SEARCH_REGEX);
 
-  private static final String PARSE_REGEX = "((<(?<id>[^=]+)=\\\"(?<data>(?:(?=\\\\\\\")..|(?!\\\").)*)\\\">)(?<text>(?:(?!</\\k<id>).)*(?:(?!>(?:\\s|[.])).)*)</\\k<id>>)";
+  private static final String PARSE_REGEX = "((<(?<id>[^=]+)=\\\"(?<data>(?:(?=\\\\\\\")..|(?!\\\").)*)\\\">)(?<text>(?:(?!</\\k<id>).)*(?:(?!(?:\\s|[.])).)*)</\\k<id>>)";
   private static final Pattern PARSE_PATTERN = Pattern.compile(PARSE_REGEX, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
   private static final List<String> PARSE_IDS = Arrays.asList("hover", "command", "chat", "copy", "suggest", "insert", "url", "gradient");
