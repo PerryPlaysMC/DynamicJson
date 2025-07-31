@@ -1,10 +1,6 @@
 package io.dynamicstudios.json.data.component;
 
 import io.dynamicstudios.json.data.util.*;
-import io.dynamicstudios.json.data.util.DynamicClickAction;
-import io.dynamicstudios.json.data.util.DynamicHoverAction;
-import io.dynamicstudios.json.data.util.DynamicStyle;
-import io.dynamicstudios.json.data.util.Keybind;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,271 +14,271 @@ import java.util.stream.Collectors;
 @SuppressWarnings("all")
 public interface IComponent extends IJson, Cloneable {
 
-  // IComponent copy();
+ // IComponent copy();
 
-  IComponent clone();
+ IComponent clone();
 
-  List<IComponent> children();
+ List<IComponent> children();
 
-  IComponent childAt(int index);
+ IComponent childAt(int index);
 
-  IComponent lastChild();
+ IComponent lastChild();
 
-  IComponent gradient(boolean toggle);
+ IComponent gradient(boolean toggle);
 
-  IComponent parent();
+ IComponent parent();
 
-  void applyData(IComponent applyTo);
+ void applyData(IComponent applyTo);
 
-  void applyEventsIfNotPresent(IComponent applyTo);
+ void applyEventsIfNotPresent(IComponent applyTo);
 
-  void removeDuplicates(IComponent applyTo);
+ void removeDuplicates(IComponent applyTo);
 
-  boolean isGradient();
+ boolean isGradient();
 
-  IComponent colorIn(CColor color);
+ IComponent colorIn(CColor color);
 
-  CColor color();
+ CColor color();
 
-  IComponent color(CColor color);
+ IComponent color(CColor color);
 
-  String click();
+ String click();
 
-  DynamicClickAction clickAction();
+ DynamicClickAction clickAction();
 
-  IComponent click(DynamicClickAction clickAction, String text);
+ IComponent click(DynamicClickAction clickAction, String text);
 
-  default IComponent command(String command) {
-    return click(DynamicClickAction.RUN_COMMAND, command);
-  }
+ default IComponent command(String command) {
+	return click(DynamicClickAction.RUN_COMMAND, command);
+ }
 
-  default IComponent chat(String text) {
-    return click(DynamicClickAction.CHAT, text);
-  }
+ default IComponent chat(String text) {
+	return click(DynamicClickAction.CHAT, text);
+ }
 
-  default IComponent suggest(String text) {
-    return click(DynamicClickAction.SUGGEST_COMMAND, text);
-  }
+ default IComponent suggest(String text) {
+	return click(DynamicClickAction.SUGGEST_COMMAND, text);
+ }
 
-  default IComponent url(String url) {
-    return click(DynamicClickAction.OPEN_URL, url);
-  }
+ default IComponent url(String url) {
+	return click(DynamicClickAction.OPEN_URL, url);
+ }
 
-  default IComponent copy(String clipboard) {
-    return click(DynamicClickAction.COPY_TO_CLIPBOARD, clipboard);
-  }
+ default IComponent copy(String clipboard) {
+	return click(DynamicClickAction.COPY_TO_CLIPBOARD, clipboard);
+ }
 
-  default IComponent changePage(String page) {
-    return click(DynamicClickAction.CHANGE_PAGE, page);
-  }
+ default IComponent changePage(String page) {
+	return click(DynamicClickAction.CHANGE_PAGE, page);
+ }
 
-  String hover();
+ String hover();
 
-  DynamicHoverAction hoverAction();
+ DynamicHoverAction hoverAction();
 
-  IComponent hover(DynamicHoverAction hoverAction, String hover);
+ IComponent hover(DynamicHoverAction hoverAction, String hover);
 
-  default IComponent hover(String... text) {
-    return hover(DynamicHoverAction.SHOW_TEXT, CColor.translateCommon(String.join("\n", text)));
-  }
+ default IComponent hover(String... text) {
+	return hover(DynamicHoverAction.SHOW_TEXT, CColor.translateCommon(String.join("\n", text)));
+ }
 
-  default IComponent hoverPlain(String... text) {
-    return hover(DynamicHoverAction.SHOW_TEXT, String.join("\n", text));
-  }
+ default IComponent hoverPlain(String... text) {
+	return hover(DynamicHoverAction.SHOW_TEXT, String.join("\n", text));
+ }
 
 
-  default IComponent hover(List<String> text) {
-    return hover(DynamicHoverAction.SHOW_TEXT, CColor.translateCommon(String.join("\n", text)));
-  }
+ default IComponent hover(List<String> text) {
+	return hover(DynamicHoverAction.SHOW_TEXT, CColor.translateCommon(String.join("\n", text)));
+ }
 
-  default IComponent hoverPlain(List<String> text) {
-    return hover(DynamicHoverAction.SHOW_TEXT, String.join("\n", text));
-  }
+ default IComponent hoverPlain(List<String> text) {
+	return hover(DynamicHoverAction.SHOW_TEXT, String.join("\n", text));
+ }
 
-  default IComponent hover(ItemStack item) {
-    return hover(DynamicHoverAction.SHOW_ITEM, CColor.translateCommon(DynamicHoverAction.itemstackToString(item)));
-  }
+ default IComponent hover(ItemStack item) {
+	return hover(DynamicHoverAction.SHOW_ITEM, CColor.translateCommon(DynamicHoverAction.itemstackToString(item)));
+ }
 
-  default IComponent hover(Entity entity) {
-    return hover(DynamicHoverAction.SHOW_ENTITY, "{\"type\":\"" +
-      entity.getType().name().toLowerCase() + "\",\"id\":" +
-      entity.getUniqueId() + ",\"name\":\"" + entity.getName() + "\"}");
-  }
+ default IComponent hover(Entity entity) {
+	return hover(DynamicHoverAction.SHOW_ENTITY, "{\"type\":\"" +
+		 entity.getType().name().toLowerCase() + "\",\"id\":" +
+		 entity.getUniqueId() + ",\"name\":\"" + entity.getName() + "\"}");
+ }
 
-  default IComponent tooltip(String... text) {
-    return hover(text);
-  }
+ default IComponent tooltip(String... text) {
+	return hover(text);
+ }
 
-  default IComponent tooltipPlain(String... text) {
-    return hoverPlain(text);
-  }
+ default IComponent tooltipPlain(String... text) {
+	return hoverPlain(text);
+ }
 
-  default IComponent tooltip(List<String> text) {
-    return hover(text);
-  }
+ default IComponent tooltip(List<String> text) {
+	return hover(text);
+ }
 
-  default IComponent tooltipPlain(List<String> text) {
-    return hoverPlain(text);
-  }
+ default IComponent tooltipPlain(List<String> text) {
+	return hoverPlain(text);
+ }
 
-  default IComponent tooltip(ItemStack item) {
-    return hover(item);
-  }
+ default IComponent tooltip(ItemStack item) {
+	return hover(item);
+ }
 
-  default IComponent tooltip(Entity entity) {
-    return hover(entity);
-  }
+ default IComponent tooltip(Entity entity) {
+	return hover(entity);
+ }
 
-  String insertion();
+ String insertion();
 
-  String font();
+ String font();
 
-  IComponent font(String font);
+ IComponent font(String font);
 
-  IComponent insertion(String text);
+ IComponent insertion(String text);
 
-  Map<DynamicStyle, Boolean> styles();
+ Map<DynamicStyle, Boolean> styles();
 
-  default Set<DynamicStyle> enabledStyles() {
-    return styles().entrySet().stream().filter(e -> e.getValue()).map(e -> e.getKey()).collect(Collectors.toSet());
-  }
+ default Set<DynamicStyle> enabledStyles() {
+	return styles().entrySet().stream().filter(e -> e.getValue()).map(e -> e.getKey()).collect(Collectors.toSet());
+ }
 
-  default Set<DynamicStyle> disabledStyles() {
-    return styles().entrySet().stream().filter(e -> !e.getValue()).map(e -> e.getKey()).collect(Collectors.toSet());
-  }
+ default Set<DynamicStyle> disabledStyles() {
+	return styles().entrySet().stream().filter(e -> !e.getValue()).map(e -> e.getKey()).collect(Collectors.toSet());
+ }
 
-  default IComponent enableStyles(DynamicStyle... styles) {
-    for(DynamicStyle style : styles) styles().put(style, true);
-    return dirtify();
-  }
+ default IComponent enableStyles(DynamicStyle... styles) {
+	for(DynamicStyle style : styles) styles().put(style, true);
+	return dirtify();
+ }
 
-  default IComponent disableStyles(DynamicStyle... styles) {
-    for(DynamicStyle style : styles) styles().put(style, false);
-    return dirtify();
-  }
+ default IComponent disableStyles(DynamicStyle... styles) {
+	for(DynamicStyle style : styles) styles().put(style, false);
+	return dirtify();
+ }
 
-  default IComponent enableStyles(Collection<DynamicStyle> styles) {
-    for(DynamicStyle style : styles) styles().put(style, true);
-    return dirtify();
-  }
+ default IComponent enableStyles(Collection<DynamicStyle> styles) {
+	for(DynamicStyle style : styles) styles().put(style, true);
+	return dirtify();
+ }
 
-  default IComponent disableStyles(Collection<DynamicStyle> styles) {
-    for(DynamicStyle style : styles) styles().put(style, false);
-    return dirtify();
-  }
+ default IComponent disableStyles(Collection<DynamicStyle> styles) {
+	for(DynamicStyle style : styles) styles().put(style, false);
+	return dirtify();
+ }
 
-  IComponent add(IComponent child);
+ IComponent add(IComponent child);
 
-  IComponent addDefault(String... children);
+ IComponent addDefault(String... children);
 
-  IComponent add(String... children);
+ IComponent add(String... children);
 
-  IComponent addReset(String... children);
+ IComponent addReset(String... children);
 
-  boolean complete();
+ boolean complete();
 
-  boolean hasData(ExcludeCheck... excludes);
+ boolean hasData(ExcludeCheck... excludes);
 
-  int length();
+ int length();
 
-  int lengthIgnoreWhitespace();
+ int lengthIgnoreWhitespace();
 
-  boolean useJsonValue();
+ boolean useJsonValue();
 
-  String keyType();
+ String keyType();
 
-  String keyValue();
+ String keyValue();
 
-  IComponent keyValue(String text);
+ IComponent keyValue(String text);
 
-  List<IComponent> with();
+ List<IComponent> with();
 
-  IComponent with(IComponent... text);
+ IComponent with(IComponent... text);
 
-  IComponent dirtify();
+ IComponent dirtify();
 
-  boolean dirty();
+ boolean dirty();
 
-  IComponent clean();
+ IComponent clean();
 
-  boolean isSimilar(IComponent component, ExcludeCheck... excludes);
+ boolean isSimilar(IComponent component, ExcludeCheck... excludes);
 
-  boolean canWriteJson();
+ boolean canWriteJson();
 
-  boolean reset();
+ boolean reset();
 
-  boolean isEmpty();
+ boolean isEmpty();
 
-  String asString();
+ String asString();
 
-  default boolean hasKeyValue() {
-    return keyValue() == null || keyValue().isEmpty();
-  }
+ default boolean hasKeyValue() {
+	return keyValue() == null || keyValue().isEmpty();
+ }
 
-  default boolean equal(Object o) {
-    if(this == o) return true;
-    if(o == null || !(o instanceof IComponent)) return false;
-    IComponent that = (IComponent) o;
-    return Objects.equals(styles(), that.styles()) &&
-      Objects.equals(children(), that.children()) && Objects.equals(with(), that.with()) && Objects.equals(color(), that.color()) && Objects.equals(hover(), that.hover()) &&
-      hoverAction() == that.hoverAction() && Objects.equals(click(), that.click()) && clickAction() == that.clickAction() &&
-      Objects.equals(insertion(), that.insertion()) && Objects.equals(keyValue().isEmpty(), that.keyValue().isEmpty()) && Objects.equals(keyType(), that.keyType());
-  }
+ default boolean equal(Object o) {
+	if(this == o) return true;
+	if(o == null || !(o instanceof IComponent)) return false;
+	IComponent that = (IComponent) o;
+	return Objects.equals(styles(), that.styles()) &&
+		 Objects.equals(children(), that.children()) && Objects.equals(with(), that.with()) && Objects.equals(color(), that.color()) && Objects.equals(hover(), that.hover()) &&
+		 hoverAction() == that.hoverAction() && Objects.equals(click(), that.click()) && clickAction() == that.clickAction() &&
+		 Objects.equals(insertion(), that.insertion()) && Objects.equals(keyValue().isEmpty(), that.keyValue().isEmpty()) && Objects.equals(keyType(), that.keyType());
+ }
 
 
-  default boolean equalsIgnoreChildren(Object o) {
-    if(this == o) return true;
-    if(o == null) return false;
-    if(o == null || !(o instanceof IComponent)) return false;
-    IComponent that = (IComponent) o;
-    return styles().equals(that.styles()) &&
-      color().equals(that.color()) && hover().equals(that.hover()) &&
-      hoverAction() == that.hoverAction() && click().equals(that.click()) && clickAction() == that.clickAction() &&
-      insertion().equals(that.insertion()) && keyValue().isEmpty() == that.keyValue().isEmpty() &&
-      (that.keyType()==null||keyType().equals(that.keyType()));
-  }
+ default boolean equalsIgnoreChildren(Object o) {
+	if(this == o) return true;
+	if(o == null) return false;
+	if(o == null || !(o instanceof IComponent)) return false;
+	IComponent that = (IComponent) o;
+	return styles().equals(that.styles()) &&
+		 color().equals(that.color()) && hover().equals(that.hover()) &&
+		 hoverAction() == that.hoverAction() && click().equals(that.click()) && clickAction() == that.clickAction() &&
+		 insertion().equals(that.insertion()) && keyValue().isEmpty() == that.keyValue().isEmpty() &&
+		 (that.keyType() == null || keyType().equals(that.keyType()));
+ }
 
-  static DynamicTextComponent textComponent(String text) {
-    return DynamicTextComponent.of(text);
-  }
+ static DynamicTextComponent textComponent(String text) {
+	return DynamicTextComponent.of(text);
+ }
 
-  static DynamicTranslatableComponent translationComponent(Translation translation) {
-    return DynamicTranslatableComponent.of(translation);
-  }
+ static DynamicTranslatableComponent translationComponent(Translation translation) {
+	return DynamicTranslatableComponent.of(translation);
+ }
 
-  static DynamicKeybindComponent keybindComponent(Keybind keybind) {
-    return DynamicKeybindComponent.of(keybind);
-  }
+ static DynamicKeybindComponent keybindComponent(Keybind keybind) {
+	return DynamicKeybindComponent.of(keybind);
+ }
 
 
-  static DynamicNBTComponent nbtComponent(String path, Entity entity) {
-    return DynamicNBTComponent.of(path, entity);
-  }
+ static DynamicNBTComponent nbtComponent(String path, Entity entity) {
+	return DynamicNBTComponent.of(path, entity);
+ }
 
-  static DynamicNBTComponent nbtComponent(String path, UUID entity) {
-    return DynamicNBTComponent.of(path, entity);
-  }
+ static DynamicNBTComponent nbtComponent(String path, UUID entity) {
+	return DynamicNBTComponent.of(path, entity);
+ }
 
-  static DynamicGradientComponent gradientComponent(CColor... colors) {
-    return DynamicGradientComponent.of(colors);
-  }
+ static DynamicGradientComponent gradientComponent(CColor... colors) {
+	return DynamicGradientComponent.of(colors);
+ }
 
-  static DynamicGradientComponent gradientComponent(String text, CColor... colors) {
-    return DynamicGradientComponent.of(text, colors);
-  }
+ static DynamicGradientComponent gradientComponent(String text, CColor... colors) {
+	return DynamicGradientComponent.of(text, colors);
+ }
 
-  static DynamicSelectorComponent selectorComponent(String text) {
-    return DynamicSelectorComponent.of(text);
-  }
+ static DynamicSelectorComponent selectorComponent(String text) {
+	return DynamicSelectorComponent.of(text);
+ }
 
-  static DynamicScoreComponent scoreComponent(String name, String objective) {
-    return DynamicScoreComponent.of(name, objective);
-  }
+ static DynamicScoreComponent scoreComponent(String name, String objective) {
+	return DynamicScoreComponent.of(name, objective);
+ }
 
-  void applyIfNotPresentData(IComponent applyTo);
+ void applyIfNotPresentData(IComponent applyTo);
 
-  public enum ExcludeCheck {
-    COLOR, HOVER_EVENT, CLICK_EVENT, INSERTION, FONT, STYLES, HAS_EMPTY_STYLES, TEXT, CHILDREN
-  }
+ public enum ExcludeCheck {
+	COLOR, HOVER_EVENT, CLICK_EVENT, INSERTION, FONT, STYLES, HAS_EMPTY_STYLES, TEXT, CHILDREN
+ }
 
 }
