@@ -134,6 +134,9 @@ public class JsonBuilder {
 	close();
 	return stringBuilder.toString();
  }
+ public String status() {
+	return stringBuilder.toString();
+ }
 
  public enum ObjectType {
 	OBJECT('{', '}'), ARRAY('[', ']');

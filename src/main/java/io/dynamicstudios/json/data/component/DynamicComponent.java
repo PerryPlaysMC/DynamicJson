@@ -488,9 +488,11 @@ public abstract class DynamicComponent implements IComponent {
 		 + children().stream().map(IComponent::plainText).collect(Collectors.joining()));
  }
 
+
  @Override
  public void writeJson(JsonBuilder builder) {
 	if(!canWriteJson()) return;
+	if(keyValue().isEmpty() && children().isEmpty()) return;
 	complete();
 	if(length() == 0) return;
 	if(keyType().equals("text") &&
@@ -512,6 +514,7 @@ public abstract class DynamicComponent implements IComponent {
 		 if(children().stream().filter(c -> !c.hasData(ExcludeCheck.TEXT)).count() == 1) {
 			if(!children().get(0).isEmpty()) {
 			 IComponent initial = children().get(0);
+			 applyData(initial);
 			 List<IComponent> children = new ArrayList<>();
 			 for(IComponent child : children()) {
 				if(child.equal(initial)) continue;
@@ -538,7 +541,9 @@ public abstract class DynamicComponent implements IComponent {
 		 if(!isEmpty()) writeData(builder, this);
 		 builder.name("extra").beginArray();
 		}
-		for(IComponent child : children()) child.writeJson(builder);
+		for(IComponent child : children()) {
+		 child.writeJson(builder);
+		}
 		if(children().size() > 1 && newObject) builder.end().end();
 		clean();
 		return;
@@ -556,18 +561,39 @@ public abstract class DynamicComponent implements IComponent {
 	}
 	builder.beginObject();
 	builder.name(keyType());
-	if(useJsonValue()) builder.jsonValue(keyValue());
-	else builder.value(keyValue());
+	boolean skipFirst = false;
+	if(useJsonValue()) {
+	 builder.jsonValue(keyValue());
+	} else {
+	 if(keyValue().isEmpty()
+			&& !children().isEmpty()
+			&& !children().get(0).keyValue().isEmpty()
+			&& children().get(0).children().isEmpty()
+			&& children().get(0).insertion().isEmpty()
+			&& children().get(0).click().isEmpty()
+			&& children().get(0).hover().isEmpty()) {
+		IComponent remove = children().get(0);
+		builder.value(remove.keyValue());
+		if(remove.color() != CColor.NONE) color(remove.color());
+		skipFirst = true;
+	 } else builder.value(keyValue());
+	}
 	if(font != null && !font.isEmpty()) builder.name("font").value(font);
 	additionalJson(builder);
 	writeData(builder, this);
 	if(!children().isEmpty()) {
 	 if(hasChildren) {
-		builder.name("extra").beginArray();
-		for(IComponent child : children()) {
-		 child.writeJson(builder);
+		if(children().stream().filter((c) -> !c.keyValue().equalsIgnoreCase(keyValue())).count() > (skipFirst ? 1 : 0)) {
+		 builder.name("extra").beginArray();
+		 for(IComponent child : children()) {
+			if(skipFirst) {
+			 skipFirst = false;
+			 continue;
+			}
+			child.writeJson(builder);
+		 }
+		 builder.end();
 		}
-		builder.end();
 	 }
 	}
 	if(!with().isEmpty()) {
@@ -581,6 +607,59 @@ public abstract class DynamicComponent implements IComponent {
 	}
 	builder.end();
 	clean();
+ }
+
+ private void groupSameColors(List<IComponent> initial) {
+	List<IComponent> ignore = new ArrayList<>();
+	List<IComponent> newComponents = new ArrayList<>(initial);
+	IComponent prev = null;
+	DynamicComponent parent = null;
+	List<IComponent> componentList = new ArrayList<>();
+	IComponent current = newComponents.isEmpty() ? null : newComponents.get(0);
+	ExcludeCheck[] checks = new ExcludeCheck[]{ExcludeCheck.COLOR, ExcludeCheck.CHILDREN, ExcludeCheck.STYLES,
+		 ExcludeCheck.FONT, ExcludeCheck.HAS_EMPTY_STYLES};
+	for(int i = 0; i < newComponents.size(); i++) {
+	 current = newComponents.get(i);
+	 IComponent future = i + 1 < newComponents.size() ? newComponents.get(i + 1) : null;
+
+	 if(future != null) {
+		boolean checkC = future.isSimilar(current, checks);// && !current.hasData(basicChecks) && !current.hasData(basicChecks2) && !current.hasData(basicChecks3);
+		boolean checkP = future.isSimilar(current, checks);// && !current.hasData(basicChecks) && !current.hasData(basicChecks2) && !current.hasData(basicChecks3);
+		if(checkC || checkP) {
+		 if(parent == null) {
+			parent = new DynamicTextComponent();
+			componentList.add(parent);
+			parent.color(current.color());
+		 }
+		 if(parent.color() == CColor.NONE) parent.color(current.color());
+		 if(!ignore.contains(current)) {
+			parent.children().add(current);
+			parent.removeDuplicates(current);
+		 }
+		 parent.children().add(future);
+		 parent.removeDuplicates(future);
+		 ignore.add(current);
+		 ignore.add(future);
+		 continue;
+		}
+	 }
+	 if(!ignore.contains(current)) {
+		if(parent != null && !componentList.contains(parent)) {
+		 parent.children().add(current);
+		 componentList.add(parent);
+		 componentList.remove(parent);
+		 componentList.add(parent.children.get(0));
+		}
+		componentList.add(current);
+		parent = null;
+	 }
+	}
+	if(parent != null && parent.children.size() == 1) {
+	 componentList.remove(parent);
+	 componentList.add(parent.children.get(0));
+	}
+	initial.clear();
+	initial.addAll(componentList);
  }
 
  private String json = "";
@@ -598,38 +677,53 @@ public abstract class DynamicComponent implements IComponent {
 
  private void writeData(JsonBuilder builder, IComponent component) {
 	CColor color = component.color() == CColor.RESET ? CColor.NONE : component.color();
-	CColor par = component.parent() != null ?
-		 (component.parent().color() == CColor.RESET ? CColor.NONE : component.parent().color()) : CColor.NONE;
-	if(color != CColor.NONE)
-	 if(component.parent() == null || par != color)
-		builder.name("color").value(color.getName());
-	IComponent parent;
-	for(Map.Entry<DynamicStyle, Boolean> entry : component.styles().entrySet()) {
-	 boolean writeStyle = entry.getValue();
-	 parent = component.parent();
-	 if(writeStyle)
-		while(parent != null) {
-		 if(parent.styles().containsKey(entry.getKey()) && parent.styles().get(entry.getKey()) == entry.getValue()) {
-			writeStyle = false;
-			break;
-		 }
-		 parent = parent.parent();
+	List<CColor> parColors = new ArrayList<>();
+	CColor par = CColor.NONE;
+	{
+	 IComponent parent = component.parent();
+	 while(parent != null) {
+		par = (parent.color() == CColor.RESET ? CColor.NONE : component.parent().color());
+		if(par != CColor.NONE) break;
+		parColors.add(par);
+		parent = parent.parent();
+	 }
+	}
+	if(!component.children().isEmpty() || component.length() > 0) {
+	 if(component.lengthIgnoreWhitespace() > 0 || !component.children().isEmpty()) {
+		if(color != CColor.NONE) {
+		 if(component.parent() == null || par != color)
+			builder.name("color").value(color.getName());
 		}
-	 if(writeStyle)
-		builder.name(entry.getKey().getName()).value(entry.getValue());
+		IComponent parent;
+		for(Map.Entry<DynamicStyle, Boolean> entry : component.styles().entrySet()) {
+		 boolean writeStyle = entry.getValue();
+		 parent = component.parent();
+		 if(writeStyle)
+			while(parent != null) {
+			 if(parent.styles().containsKey(entry.getKey()) && parent.styles().get(entry.getKey()) == entry.getValue()) {
+				writeStyle = false;
+				break;
+			 }
+			 parent = parent.parent();
+			}
+		 if(writeStyle)
+			builder.name(entry.getKey().getName()).value(entry.getValue());
+		}
+	 }
+	 if(component.clickAction() != DynamicClickAction.NONE && !component.click().isEmpty())
+		builder.name(Version.isCurrentHigher(Version.v1_21_R4) ? "click_event" : "clickEvent").beginObject()
+			 .name("action").value(component.clickAction().id().toLowerCase())
+			 .name(Version.isCurrentHigher(Version.v1_21_R4) ? "command" : "value").value(component.click())
+			 .end();
+	 if(component.hoverAction() != DynamicHoverAction.NONE && !component.hover().isEmpty()) {
+		builder.name(Version.isCurrentHigher(Version.v1_21_R4) ? "hover_event" : "hoverEvent").beginObject()
+			 .name("action").value(component.hoverAction().name().toLowerCase());
+		if(component.hoverAction() == DynamicHoverAction.SHOW_ITEM)
+		 builder.name("value").jsonValue(component.hover()).end();
+		else builder.name("value").value(component.hover()).end();
+	 }
+	 if(!component.insertion().isEmpty()) builder.name("insertion").value(component.insertion());
 	}
-	if(component.clickAction() != DynamicClickAction.NONE && !component.click().isEmpty())
-	 builder.name(Version.isCurrentHigher(Version.v1_21_R4) ? "click_event" : "clickEvent").beginObject()
-			.name("action").value(component.clickAction().id().toLowerCase())
-			.name(Version.isCurrentHigher(Version.v1_21_R4) ? "command" : "value").value(component.click())
-			.end();
-	if(component.hoverAction() != DynamicHoverAction.NONE && !component.hover().isEmpty()) {
-	 builder.name(Version.isCurrentHigher(Version.v1_21_R4) ? "hover_event" : "hoverEvent").beginObject()
-			.name("action").value(component.hoverAction().name().toLowerCase());
-	 if(component.hoverAction() == DynamicHoverAction.SHOW_ITEM) builder.name("value").jsonValue(component.hover()).end();
-	 else builder.name("value").value(component.hover()).end();
-	}
-	if(!component.insertion().isEmpty()) builder.name("insertion").value(component.insertion());
  }
 
  @Override
@@ -707,114 +801,128 @@ public abstract class DynamicComponent implements IComponent {
 	List<IComponent> ignore = new ArrayList<>();
 	List<IComponent> newComponents = new ArrayList<>();
 	DynamicComponent parent = null;
+	condenseWhiteSpaces(components, ignore, newComponents);
+	List<IComponent> componentList = new ArrayList<>();
+	IComponent current;
+	try {
+	 ExcludeCheck[] hoverChecks = new ExcludeCheck[]{ExcludeCheck.TEXT, ExcludeCheck.COLOR, ExcludeCheck.CHILDREN, ExcludeCheck.STYLES,
+			ExcludeCheck.FONT, ExcludeCheck.HAS_EMPTY_STYLES, ExcludeCheck.CLICK_EVENT, ExcludeCheck.INSERTION};
+	 ExcludeCheck[] clickChecks = new ExcludeCheck[]{ExcludeCheck.TEXT, ExcludeCheck.COLOR, ExcludeCheck.CHILDREN, ExcludeCheck.STYLES,
+			ExcludeCheck.FONT, ExcludeCheck.HAS_EMPTY_STYLES, ExcludeCheck.HOVER_EVENT, ExcludeCheck.INSERTION};
+	 ExcludeCheck[] insertChecks = new ExcludeCheck[]{ExcludeCheck.TEXT, ExcludeCheck.COLOR, ExcludeCheck.CHILDREN, ExcludeCheck.STYLES,
+			ExcludeCheck.FONT, ExcludeCheck.HAS_EMPTY_STYLES, ExcludeCheck.HOVER_EVENT, ExcludeCheck.CLICK_EVENT};
+	 for(int i = 0; i < newComponents.size(); i++) {
+		current = newComponents.get(i);
+		IComponent future = i + 1 < newComponents.size() ? newComponents.get(i + 1) : null;
+		if(future != null) {
+		 isSimilar(this);
+		 boolean hoverC = future.isSimilar(current, hoverChecks) && current.hasData(hoverChecks);
+		 boolean clickC = future.isSimilar(current, clickChecks) && current.hasData(clickChecks);
+		 boolean insC = future.isSimilar(current, insertChecks) && current.hasData(insertChecks);
+		 boolean hoverP = parent != null && future.isSimilar(parent, clickChecks) && parent.hasData(clickChecks);
+		 boolean clickP = parent != null && future.isSimilar(parent, clickChecks) && parent.hasData(clickChecks);
+		 boolean insP = parent != null && future.isSimilar(parent, insertChecks) && parent.hasData(insertChecks);
+		 if(hoverC || clickC || hoverP || clickP || insC || insP) {
+			if(parent == null) {
+			 parent = new DynamicTextComponent();
+			 current.applyData(parent);
+			 componentList.add(parent);
+			}
+			if(!ignore.contains(current)) {
+			 parent.children().add(current);
+			 parent.removeDuplicates(current);
+			}
+			parent.children().add(future);
+			parent.removeDuplicates(future);
+			ignore.add(current);
+			ignore.add(future);
+			continue;
+		 }
+		}
+		if(!ignore.contains(current)) {
+		 if(parent != null && !componentList.contains(parent)) {
+			parent.children().add(current);
+			if(parent.children.size() == 1)
+			 componentList.add(parent.children.get(0));
+			else componentList.add(parent);
+		 }
+		 componentList.add(current);
+		 parent = null;
+		}
+	 }
+	} catch(StackOverflowError e) {
+	 e.printStackTrace();
+	}
+	List<IComponent> total = new ArrayList<>(componentList);
+	List<IComponent> working = new ArrayList<>();
+	parent = null;
+//	for(IComponent iComponent : componentList) {
+//	 current = iComponent;
+//	 if(current.click().isEmpty() && current.hover().isEmpty() && current.insertion().isEmpty()) {
+//		if(parent == null && current instanceof DynamicComponent) {
+//		 parent = (DynamicComponent) current;
+////		 total.add(parent);
+//		}
+//		else if(parent != null) parent.children().add(current);
+//	 }else {
+//		if(parent != null){
+//		 if(parent.children.size() < 5) {
+//			total.add(parent);
+//			total.addAll(parent.children);
+//			parent.children.clear();
+//		 }else {
+//		 System.out.println(parent.children.size());
+//		 total.add(parent);
+//		 }
+//		}
+//		total.add(current);
+//		parent = null;
+//	 }
+//	}
+	if(parent != null) total.add(parent);
+	components.clear();
+	components.addAll(total);
+ }
+
+ private void condenseWhiteSpaces(List<IComponent> components, List<IComponent> ignore, List<IComponent> newComponents) {
 	IComponent prev = null;
-	IComponent prevParent = null;
 	for(IComponent current : components) {
 	 if(!ignore.contains(current)) newComponents.add(current);
 	 if(current instanceof DynamicComponent) ((DynamicComponent) current).parent = this;
-	 if(prev != null && current.isGradient() == prev.isGradient() && current.getClass().equals(prev.getClass())) {
-		if(!current.reset() && ((current.color() == CColor.NONE && prev.color() != CColor.NONE) || (prev.color() != CColor.NONE && prev.color().compare(current.color()))))
+	 boolean white = prev != null && prev.lengthIgnoreWhitespace() == 0 && prev.length() > 0 && (prev.disabledStyles().stream().noneMatch(current.enabledStyles()::contains) || prev.keyValue().matches("[^ ]+"));
+	 if(prev != null && (current.isGradient() == prev.isGradient() || white)
+			&& (current.getClass().equals(prev.getClass()) || white)) {
+		if(!current.reset() && ((current.color() == CColor.NONE && prev.color() != CColor.NONE) ||
+			 (prev.color() != CColor.NONE && prev.color().compare(current.color()))))
 		 current.color(prev.color());
 		IComponent finalPrev = prev;
 		if(!current.reset())
 		 prev.styles().keySet().forEach(key -> current.styles().computeIfAbsent(key, finalPrev.styles()::get));
-		if(prev.isSimilar(current) && !current.reset()) {
+		if(prev.isSimilar(current) && !current.reset() && !white) {
 		 prev.keyValue(prev.keyValue() + current.keyValue());
 		 ignore.add(current);
-		} else if(prev.lengthIgnoreWhitespace() == 0 && prev.length() > 0) {
-		 current.keyValue(prev.keyValue() + current.keyValue());
-		 ignore.add(prev);
+		} else if(white && !current.reset()) {
+		 if(prev.disabledStyles().stream().noneMatch(current.enabledStyles()::contains) || prev.keyValue().matches("[^ ]+")) {
+			if(current.getClass().equals(prev.getClass())) {
+			 current.keyValue(prev.keyValue() + current.keyValue());
+			ignore.add(prev);
+			} else {
+			 if(!current.children().isEmpty()) {
+				current.children().get(0).keyValue(prev.keyValue() + current.children().get(0).keyValue());
+				ignore.add(prev);
+			 }
+			}
+		 }
 		}
 	 }
 	 if(!ignore.contains(current)) prev = current;
 	}
 	newComponents.removeAll(ignore);
 	ignore.clear();
-	List<IComponent> componentList = new ArrayList<>();
-	for(int i = 0; i < newComponents.size(); i++) {
-	 prev = i - 1 >= 0 ? newComponents.get(i - 1) : null;
-	 IComponent current = newComponents.get(i);
-	 IComponent future = i + 1 < newComponents.size() ? newComponents.get(i + 1) : null;
-	 ExcludeCheck[] checks = current.isGradient() ? new ExcludeCheck[]{ExcludeCheck.COLOR, ExcludeCheck.HAS_EMPTY_STYLES} : new ExcludeCheck[]{ExcludeCheck.HAS_EMPTY_STYLES};
-	 if(future == null) {
-		if(parent != null) {
-		 if(parent.isSimilar(current, checks) && current.isGradient() == parent.isGradient()) {
-			parent.removeDuplicates(current);
-			parent.children().add(current);
-			parent.clean();
-			ignore.add(current);
-		 }
-		 if(prevParent != null && parent.isGradient() == prevParent.isGradient() && parent.isSimilar(prevParent,
-				parent.isGradient() ? new ExcludeCheck[]{ExcludeCheck.COLOR} : new ExcludeCheck[0])) {
-			prevParent.children().add(parent);
-			componentList.add(prevParent);
-		 } else {
-			if(prevParent != null && !componentList.contains(prevParent)) componentList.add(prevParent);
-			componentList.add(parent);
-		 }
-		 if(parent.children().size() == 1) {
-			parent.applyIfNotPresentData(current);
-			componentList.remove(parent);
-			componentList.add(current);
-			continue;
-		 }
-		}
-		if(!componentList.contains(current) && !ignore.contains(current)) {
-		 componentList.add(current);
-		}
-		continue;
-	 }
-	 if(componentList.contains(current)) continue;
-	 if(parent != null && current.isGradient() == parent.isGradient() && parent.isSimilar(current, checks)) {
-		parent.removeDuplicates(current);
-		parent.children().add(current);
-		continue;
-	 } else {
-		if(parent != null) {
-		 parent.clean();
-		 if(prevParent != null && parent.isGradient() == prevParent.isGradient() && parent.isSimilar(prevParent,
-				parent.isGradient() ? new ExcludeCheck[]{ExcludeCheck.COLOR} : new ExcludeCheck[0])) {
-			prevParent.children().add(parent);
-			continue;
-		 } else {
-			componentList.add(parent);
-		 }
-		 prevParent = parent;
-		}
-		if(parent != null) {
-		 if(parent.children().size() == 1) {
-			parent.applyIfNotPresentData(prev);
-			componentList.remove(parent);
-			componentList.add(prev);
-		 }
-		}
-		parent = null;
-	 }
-	 componentList.add(current);
-	 if(!current.children().isEmpty() && !current.hasData(ExcludeCheck.CHILDREN)) continue;
-	 if(current.isGradient() == future.isGradient() && current.reset() == future.reset())
-		if(current.children().isEmpty() && future.children().isEmpty() && current.isSimilar(future, checks) && current.hasData(ExcludeCheck.TEXT)) {
-		 parent = new DynamicTextComponent();
-		 parent.gradient(current.isGradient());
-		 current.applyData(parent);
-		 current.gradient(false);
-		 parent.removeDuplicates(current);
-		 parent.children().add(current);
-		 componentList.remove(current);
-		}
-	}
-	for(IComponent iComponent : componentList) setParents(iComponent);
-	if(componentList.size() == 1 && !componentList.get(0).children().isEmpty()) {
-	 if(!componentList.get(0).children().get(0).isGradient()) {
-		this.applyData(componentList.get(0));
-		componentList.addAll(componentList.remove(0).children());
-	 }
-	}
-	components.clear();
-	components.addAll(componentList);
  }
 
  private void setParents(IComponent component) {
+//	 groupSameColors(component.children());
 	for(IComponent child : component.children()) {
 	 if(child instanceof DynamicComponent) ((DynamicComponent) child).parent = component;
 	 setParents(child);
