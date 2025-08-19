@@ -491,9 +491,9 @@ public abstract class DynamicComponent implements IComponent {
 
  @Override
  public void writeJson(JsonBuilder builder) {
+	complete();
 	if(!canWriteJson()) return;
 	if(keyValue().isEmpty() && children().isEmpty()) return;
-	complete();
 	if(length() == 0) return;
 	if(keyType().equals("text") &&
 		 !(this instanceof IChildPriority) && children().size() == 1 && children().get(0).children().isEmpty() &&
