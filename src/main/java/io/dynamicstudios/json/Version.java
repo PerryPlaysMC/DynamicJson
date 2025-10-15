@@ -98,52 +98,67 @@ public enum Version {
  }
 
 
- public static Class<?> findClass(String name) {
-	return findClass(name, false);
+ public static Class<?> findClass(String... names) {
+	return findClass(false, names);
  }
 
- public static Class<?> findClass(String name, boolean stackTrace) {
-	try {
-	 return Class.forName(name);
-	} catch(Exception e) {
-	 if(stackTrace)
-		e.printStackTrace();
-	 return null;
+ public static Class<?> findClass(boolean stackTrace, String... names) {
+	for(String name : names) {
+
+	 try {
+		return Class.forName(name);
+	 } catch(Exception e) {
+		if(stackTrace)
+		 e.printStackTrace();
+	 }
 	}
+	return null;
  }
 
  public static class CraftBukkit {
 	private static final HashMap<String, Class<?>> CACHE = new HashMap<>();
 
-	public static Class<?> getClass(String clazz) {
-	 if(CACHE.containsKey(clazz)) return CACHE.get(clazz);
-	 Class<?> cls = findClass(getCBPackage() + "." + clazz);
-	 if(cls == null) {
-		cls = findClass(getCBPackage() + "." + clazz);
+	public static Class<?> getClass(String... classes) {
+	 for(String clazz : classes) {
+		if(CACHE.containsKey(clazz)) return CACHE.get(clazz);
 	 }
-	 if(cls == null) {
-		cls = findClass(getCBPackage2() + "." + clazz);
+	 for(String clazz : classes) {
+		Class<?> cls = findClass(getCBPackage() + "." + clazz);
+		if(cls == null) {
+		 cls = findClass(getCBPackage() + "." + clazz);
+		}
+		if(cls == null) {
+		 cls = findClass(getCBPackage2() + "." + clazz);
+		}
+		if(cls == null) continue;
+		CACHE.put(clazz, cls);
+		return cls;
 	 }
-	 CACHE.put(clazz, cls);
-	 return cls;
+	 return null;
 	}
  }
 
  public static class Minecraft {
 	private static final HashMap<String, Class<?>> CACHE = new HashMap<>();
 
-	public static Class<?> getClass(String clazz) {
-	 if(CACHE.containsKey(clazz)) return CACHE.get(clazz);
-	 String nms = getNMSPackage();
-	 Class<?> cls = null;
-	 if(!isCurrentHigher(v1_16_R3))
-		if(clazz.contains("."))
-		 cls = findClass(nms + "." + clazz.split("\\.")[clazz.split("\\.").length - 1]);
-	 if(cls == null)
-		cls = findClass(nms + "." + clazz);
-	 if(cls != null)
-		CACHE.put(clazz, cls);
-	 return cls;
+	public static Class<?> getClass(String... classes) {
+	 for(String clazz : classes) {
+		if(CACHE.containsKey(clazz)) return CACHE.get(clazz);
+	 }
+	 for(String clazz : classes) {
+		String nms = getNMSPackage();
+		Class<?> cls = null;
+		if(!isCurrentHigher(v1_16_R3))
+		 if(clazz.contains("."))
+			cls = findClass(nms + "." + clazz.split("\\.")[clazz.split("\\.").length - 1]);
+		if(cls == null)
+		 cls = findClass(nms + "." + clazz);
+		if(cls != null) {
+		 CACHE.put(clazz, cls);
+		 return cls;
+		}
+	 }
+	 return null;
 	}
  }
 
@@ -151,12 +166,18 @@ public enum Version {
  public static class Mojang {
 	private static final HashMap<String, Class<?>> CACHE = new HashMap<>();
 
-	public static Class<?> getClass(String clazz) {
-	 if(CACHE.containsKey(clazz)) return CACHE.get(clazz);
-	 String nms = Version.isCurrentHigher(v1_7) ? "com.mojang" : "net.minecraft.util.com.mojang";
-	 Class<?> cls = Version.findClass(nms + "." + clazz);
-	 CACHE.put(clazz, cls);
-	 return cls;
+	public static Class<?> getClass(String... classes) {
+	 for(String clazz : classes) {
+		if(CACHE.containsKey(clazz)) return CACHE.get(clazz);
+	 }
+	 for(String clazz : classes) {
+		String nms = Version.isCurrentHigher(v1_7) ? "com.mojang" : "net.minecraft.util.com.mojang";
+		Class<?> cls = Version.findClass(nms + "." + clazz);
+		if(cls == null) continue;
+		CACHE.put(clazz, cls);
+		return cls;
+	 }
+	 return null;
 	}
  }
 
@@ -223,6 +244,8 @@ public enum Version {
 	}
 	return current = ret;
  }
+
+
 
  @Override
  public String toString() {

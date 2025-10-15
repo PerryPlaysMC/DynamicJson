@@ -7,10 +7,7 @@ import io.dynamicstudios.json.data.util.DynamicStyle;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,7 +69,7 @@ public class DynamicTextComponent extends DynamicComponent {
 	for(String s : text.toLowerCase().split("§")) {
 	 if(s.isEmpty()) continue;
 	 if(s.equals("r")) {
-		disableForNext.addAll(styles);
+		disableForNext.addAll(Arrays.asList(DynamicStyle.values()));
 		styles.clear();
 		continue;
 	 }
@@ -98,13 +95,13 @@ public class DynamicTextComponent extends DynamicComponent {
 		String s1 = isEmpty(results.group(1)) ? "" : results.group(1);
 		String s2 = isEmpty(results.group(3)) ? "" : results.group(3);
 		if(s2.endsWith(CColor.RESET.toString()) || (s2.isEmpty() && s1.endsWith(CColor.RESET.toString()))) {
-		 cColor = CColor.WHITE;
-		 disableForNext.addAll(styles);
+		 cColor = color.isEmpty() ? CColor.WHITE : CColor.fromHex(color);
+		 disableForNext.addAll(Arrays.asList(DynamicStyle.values()));
 		 styles.clear();
 		} else try {
 		 generateStyles(s1, styles, disableForNext);
 		 if(!color.isEmpty()) if(color.endsWith(CColor.RESET.toString())) {
-			disableForNext.addAll(styles);
+			disableForNext.addAll(Arrays.asList(DynamicStyle.values()));
 			styles.clear();
 		 } else cColor = CColor.fromHex(color);
 		 generateStyles(s2, styles, disableForNext);
