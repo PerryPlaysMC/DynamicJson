@@ -513,6 +513,7 @@ public abstract class DynamicComponent implements IComponent {
 		if(children().size() > 1) {
 		 if(children().stream().filter(c -> !c.hasData(ExcludeCheck.TEXT)).count() == 1) {
 			if(!children().get(0).isEmpty()) {
+			 System.out.println("Redefining: " + keyType() + " > '" + keyValue() + "' (" + children.size() + ")");
 			 IComponent initial = children().get(0);
 			 applyData(initial);
 			 List<IComponent> children = new ArrayList<>();
@@ -583,7 +584,7 @@ public abstract class DynamicComponent implements IComponent {
 	writeData(builder, this);
 	if(!children().isEmpty()) {
 	 if(hasChildren) {
-		if(children().stream().filter((c) -> !c.keyValue().equalsIgnoreCase(keyValue())).count() > (skipFirst ? 1 : 0)) {
+		if(children().stream().filter((c) -> !c.keyValue().equalsIgnoreCase(keyValue()) || (c.keyValue().isEmpty() && keyValue().isEmpty() && !c.children().isEmpty())).count() > (skipFirst ? 1 : 0)) {
 		 builder.name("extra").beginArray();
 		 for(IComponent child : children()) {
 			if(skipFirst) {
