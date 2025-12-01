@@ -513,7 +513,6 @@ public abstract class DynamicComponent implements IComponent {
 		if(children().size() > 1) {
 		 if(children().stream().filter(c -> !c.hasData(ExcludeCheck.TEXT)).count() == 1) {
 			if(!children().get(0).isEmpty()) {
-			 System.out.println("Redefining: " + keyType() + " > '" + keyValue() + "' (" + children.size() + ")");
 			 IComponent initial = children().get(0);
 			 applyData(initial);
 			 List<IComponent> children = new ArrayList<>();
@@ -857,29 +856,6 @@ public abstract class DynamicComponent implements IComponent {
 	List<IComponent> total = new ArrayList<>(componentList);
 	List<IComponent> working = new ArrayList<>();
 	parent = null;
-//	for(IComponent iComponent : componentList) {
-//	 current = iComponent;
-//	 if(current.click().isEmpty() && current.hover().isEmpty() && current.insertion().isEmpty()) {
-//		if(parent == null && current instanceof DynamicComponent) {
-//		 parent = (DynamicComponent) current;
-////		 total.add(parent);
-//		}
-//		else if(parent != null) parent.children().add(current);
-//	 }else {
-//		if(parent != null){
-//		 if(parent.children.size() < 5) {
-//			total.add(parent);
-//			total.addAll(parent.children);
-//			parent.children.clear();
-//		 }else {
-//		 System.out.println(parent.children.size());
-//		 total.add(parent);
-//		 }
-//		}
-//		total.add(current);
-//		parent = null;
-//	 }
-//	}
 	if(parent != null) total.add(parent);
 	components.clear();
 	components.addAll(total);
